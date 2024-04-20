@@ -13,3 +13,10 @@ build:
 run:
 	bash swag.sh
 	go run main.go
+
+#swag:
+#	@if [ ! -d "swagger-go" ]; then \
+#	    git clone git@github.com:d2jvkpn/swagger-go.git; \
+#	    rm -rf swagger-go/.gitignore swagger-go/.git; \
+#	fi
+#	bash swagger-go/swag.sh
