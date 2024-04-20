@@ -4,8 +4,8 @@ _wd=$(pwd); _path=$(dirname $0 | xargs -i readlink -f {})
 
 command -v swag || go install github.com/swaggo/swag/cmd/swag@latest
 
-if [ -d ../.git ]; then
-    target_dir=../
+if [ $# -gt 0 ]; then
+    target_dir=$1
     echo "==> cd to target dir: $target_dir"
     cd $target_dir
 fi

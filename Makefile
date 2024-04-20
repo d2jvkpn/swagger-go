@@ -32,7 +32,7 @@ run:
 
 #swag:
 #	@if [ ! -d "swagger-go" ]; then \
-#	    git clone git@github.com:d2jvkpn/swagger-go.git; \
-#	    rm -rf swagger-go/.git; \
+#	    git clone git@github.com:d2jvkpn/swagger-go.git /tmp/swagger-go; \
+#	    rsync -arvP --exclude .git /tmp/swagger-go ./; \
 #	fi
 #	bash swagger-go/swag.sh $(shell pwd)
