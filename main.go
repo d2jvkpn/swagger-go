@@ -194,7 +194,7 @@ func LoadSwagger(router *gin.RouterGroup, updates ...func(*swag.Spec)) {
 
 /*
 
-// Hello godoc
+// example_01: Hello godoc
 //
 //	@Summary		Show an account
 //	@Description	get string by ID
