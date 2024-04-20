@@ -109,9 +109,17 @@ func main() {
 	}
 
 	LoadSwagger(router, func(spec *swag.Spec) {
-		spec.Title = swagger_title
-		spec.Host = swagger_host
-		spec.BasePath = swagger_base_path
+		if swagger_title != "" {
+			spec.Title = swagger_title
+		}
+
+		if swagger_host != "" {
+			spec.Host = swagger_host
+		}
+
+		if swagger_base_path != "" {
+			spec.BasePath = swagger_base_path
+		}
 	})
 
 	// engine.Run(addr)
