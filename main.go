@@ -1,9 +1,15 @@
 package main
 
 import (
+	"errors"
 	"flag"
 	"fmt"
+	"log/slog"
+	"net"
 	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
 
 	"swagger-go/docs"
 
@@ -24,18 +30,24 @@ var (
 func main() {
 	var (
 		release           bool
-		addr              string
+		http_addr         string
 		http_path         string
 		swagger_title     string
 		swagger_host      string
 		swagger_base_path string
+		err               error
+		errch             chan error
+		quit              chan os.Signal
+		logger            *slog.Logger
 
-		router *gin.RouterGroup
-		engine *gin.Engine
+		httpListener net.Listener
+		router       *gin.RouterGroup
+		engine       *gin.Engine
+		server       *http.Server
 	)
 
 	flag.BoolVar(&release, "release", false, "run in release mode")
-	flag.StringVar(&addr, "addr", ":3056", "http listening address")
+	flag.StringVar(&http_addr, "http.addr", ":3056", "http listening address")
 	flag.StringVar(&http_path, "http.path", "", "http base path")
 
 	flag.StringVar(&swagger_title, "swagger.title", "Swagger Example API", "swagger title")
@@ -61,6 +73,20 @@ func main() {
 
 	flag.Parse()
 
+	// logger = slog.New(slog.NewTextHandler(os.Stderr, nil))
+	logger = slog.New(slog.NewJSONHandler(os.Stderr, nil))
+
+	defer func() {
+		if err != nil {
+			os.Exit(1)
+		}
+	}()
+
+	if httpListener, err = net.Listen("tcp", http_addr); err != nil {
+		err = fmt.Errorf("net.Listen: %w", err)
+		return
+	}
+
 	if release {
 		gin.SetMode(gin.ReleaseMode)
 		engine = gin.New()
@@ -80,7 +106,41 @@ func main() {
 		spec.BasePath = swagger_base_path
 	})
 
-	engine.Run(addr)
+	// engine.Run(addr)
+
+	server = new(http.Server)
+
+	go func() {
+		var err error
+
+		if err = server.Serve(httpListener); err != http.ErrServerClosed {
+			errch <- fmt.Errorf("http_server_down")
+		}
+	}()
+
+	errch = make(chan error, 1)
+	quit = make(chan os.Signal, 1)
+	signal.Notify(quit, os.Interrupt, syscall.SIGTERM) // syscall.SIGUSR2
+
+	syncErrors := func(num int) {
+		for i := 0; i < num; i++ {
+			err = errors.Join(err, <-errch)
+		}
+	}
+
+	select {
+	case err = <-errch:
+		syncErrors(cap(errch) - 1)
+
+		logger.Error("... received from error channel", "error", err)
+	case sig := <-quit:
+		// if sig == syscall.SIGUSR2 {...}
+		// fmt.Fprintf(os.Stderr, "... received signal: %s\n", sig)
+		errch <- fmt.Errorf("shutdown")
+		syncErrors(cap(errch))
+
+		logger.Info("... quit", "signal", sig.String(), "error", err)
+	}
 }
 
 func LoadSwagger(router *gin.RouterGroup, alert ...func(*swag.Spec)) {
@@ -96,10 +156,12 @@ func LoadSwagger(router *gin.RouterGroup, alert ...func(*swag.Spec)) {
 		alert[0](docs.SwaggerInfo)
 	}
 
-	// "/swagger"
-	router.GET("/", func(ctx *gin.Context) {
-		ctx.Redirect(http.StatusTemporaryRedirect, ctx.FullPath()+"/index.html")
-	})
+	/*
+		// "/swagger"
+		router.GET("/", func(ctx *gin.Context) {
+			ctx.Redirect(http.StatusTemporaryRedirect, ctx.FullPath()+"/index.html")
+		})
+	*/
 
 	// "/swagger/*any"
 	router.GET("/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
