@@ -191,3 +191,26 @@ func LoadSwagger(router *gin.RouterGroup, updates ...func(*swag.Spec)) {
 	// "/swagger/*any"
 	router.GET("/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 }
+
+/*
+
+// Hello godoc
+//
+//	@Summary		Show an account
+//	@Description	get string by ID
+//	@Tags			accounts
+//	@Accept			json
+//	@Produce		json
+//	@Param	id		path	int			true	"Account ID"
+//	@Param	name	query	string		flase	"Account Name"
+//	@Param	login	body	LoginUser	true	"user password"
+//	@Success		200	{object}	Response
+//	@Failure		400	{object}	error
+//	@Failure		404	{object}	error
+//	@Failure		500	{object}	error
+//	@Router			/accounts/{id}	[get]
+func Hello(ctx *gin.Context) {
+	// TODO: ...
+}
+
+*/
