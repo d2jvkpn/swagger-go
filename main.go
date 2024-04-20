@@ -160,7 +160,7 @@ func main() {
 	}
 }
 
-func LoadSwagger(router *gin.RouterGroup, alert ...func(*swag.Spec)) {
+func LoadSwagger(router *gin.RouterGroup, updates ...func(*swag.Spec)) {
 	// programmatically set swagger info
 	docs.SwaggerInfo.Title = "Swagger Example API"
 	docs.SwaggerInfo.Description = "This is a sample server."
@@ -169,8 +169,8 @@ func LoadSwagger(router *gin.RouterGroup, alert ...func(*swag.Spec)) {
 	docs.SwaggerInfo.BasePath = "/v2"
 	docs.SwaggerInfo.Schemes = []string{"http", "https"}
 
-	if len(alert) > 0 {
-		alert[0](docs.SwaggerInfo)
+	if len(updates) > 0 {
+		updates[0](docs.SwaggerInfo)
 	}
 
 	/*
