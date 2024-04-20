@@ -27,12 +27,12 @@ build:
 	ls -alh target/
 
 run:
-	bash swag.sh
-	go run main.go
+	./target/swagger-go
 
 #swag:
 #	@if [ ! -d "swagger-go" ]; then \
 #	    git clone git@github.com:d2jvkpn/swagger-go.git /tmp/swagger-go; \
 #	    rsync -arvP --exclude .git /tmp/swagger-go ./; \
+#	    rm -rf /tmp/swagger-go; \
 #	fi
 #	bash swagger-go/swag.sh $(shell pwd)
