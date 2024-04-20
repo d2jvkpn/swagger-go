@@ -20,7 +20,8 @@ build:
 	bash swag.sh
 	mkdir -p target
 
-	@go build -ldflags="-w -s -X main.BUILD_Time=$(build_time) \
+	@go build -ldflags="-w -s \
+	  -X main.BUILD_Time=$(build_time) \
 	  -X main.GIT_Repository=$(git_repository) \
 	  -X main.GIT_Branch=$(git_branch) \
 	  -X main.GIT_CommitId=$(git_commit_id) \
