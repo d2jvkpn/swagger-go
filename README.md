@@ -8,7 +8,6 @@ git config user.name d2jvkpn
 git config user.name d2jvkpn@noreply.local
 
 git branch -m main
-
 git remote add origin git@github.com:d2jvkpn/swagger-go.git
 
 git add -A
@@ -21,3 +20,19 @@ git push -u origin main
 - https://github.com/swaggo
 - https://github.com/swaggo/swag?tab=readme-ov-file#how-to-use-it-with-gin
 - https://github.com/swaggo/http-swagger
+
+#### P3. Append to Makefile
+```bash
+
+cat >> Makefile <<'EOF'
+
+swag:
+	@if [ ! -d "swagger-go" ]; then \
+	    git clone git@github.com:d2jvkpn/swagger-go.git /tmp/swagger-go; \
+	    rsync -arvP --exclude .git /tmp/swagger-go ./; \
+	    rm -rf /tmp/swagger-go; \
+	fi
+	bash swagger-go/swag.sh $(shell pwd)
+EOF
+
+```
