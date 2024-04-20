@@ -1,6 +1,7 @@
 package main
 
 import (
+	"crypto/tls"
 	"errors"
 	"flag"
 	"fmt"
@@ -32,13 +33,17 @@ func main() {
 		release           bool
 		http_addr         string
 		http_path         string
+		tls_cert          string
+		tls_key           string
 		swagger_title     string
 		swagger_host      string
 		swagger_base_path string
-		err               error
-		errch             chan error
-		quit              chan os.Signal
-		logger            *slog.Logger
+
+		err    error
+		errch  chan error
+		quit   chan os.Signal
+		logger *slog.Logger
+		cert   tls.Certificate
 
 		httpListener net.Listener
 		router       *gin.RouterGroup
@@ -47,8 +52,11 @@ func main() {
 	)
 
 	flag.BoolVar(&release, "release", false, "run in release mode")
+
 	flag.StringVar(&http_addr, "http.addr", ":3056", "http listening address")
 	flag.StringVar(&http_path, "http.path", "", "http base path")
+	flag.StringVar(&tls_cert, "tls.cert", "", "http tls key cert")
+	flag.StringVar(&tls_key, "tls.key", "", "http tls key file")
 
 	flag.StringVar(&swagger_title, "swagger.title", "Swagger Example API", "swagger title")
 	flag.StringVar(&swagger_host, "swagger.host", "petstore.swagger.io", "swagger host")
@@ -109,6 +117,15 @@ func main() {
 	// engine.Run(addr)
 
 	server = new(http.Server)
+
+	if tls_cert != "" && tls_key != "" {
+		if cert, err = tls.LoadX509KeyPair(tls_cert, tls_key); err != nil {
+			return
+		}
+		server.TLSConfig = &tls.Config{
+			Certificates: []tls.Certificate{cert},
+		}
+	}
 
 	go func() {
 		var err error
