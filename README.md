@@ -16,6 +16,8 @@ git commit -m "init"
 git push -u origin main
 ```
 
-#### P2. 
-
-#### P3. 
+#### P2. Links
+- https://swagger.io/
+- https://github.com/swaggo
+- https://github.com/swaggo/swag?tab=readme-ov-file#how-to-use-it-with-gin
+- https://github.com/swaggo/http-swagger

@@ -33,6 +33,6 @@ run:
 #swag:
 #	@if [ ! -d "swagger-go" ]; then \
 #	    git clone git@github.com:d2jvkpn/swagger-go.git; \
-#	    rm -rf swagger-go/.gitignore swagger-go/.git; \
+#	    rm -rf swagger-go/.git; \
 #	fi
 #	bash swagger-go/swag.sh $(shell pwd)
