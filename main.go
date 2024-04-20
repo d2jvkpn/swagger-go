@@ -21,11 +21,11 @@ import (
 )
 
 var (
-	BUILD_Time     string
-	GIT_Repository string
-	GIT_Branch     string
-	GIT_CommitId   string
-	GIT_CommitTime string
+	build_time      string
+	git_repository  string
+	git_branch      string
+	git_commit_id   string
+	git_commit_time string
 )
 
 func main() {
@@ -55,7 +55,7 @@ func main() {
 
 	flag.StringVar(&http_addr, "http.addr", ":3056", "http listening address")
 	flag.StringVar(&http_path, "http.path", "", "http base path")
-	flag.StringVar(&tls_cert, "tls.cert", "", "http tls key cert")
+	flag.StringVar(&tls_cert, "tls.cert", "", "http tls cert file")
 	flag.StringVar(&tls_key, "tls.key", "", "http tls key file")
 
 	flag.StringVar(&swagger_title, "swagger.title", "Swagger Example API", "swagger title")
@@ -71,11 +71,11 @@ func main() {
 		fmt.Fprintf(output, "```\n")
 
 		fmt.Fprintf(output, "\n#### Build\n```yaml\n")
-		fmt.Fprintf(output, "build_time: %s\n", BUILD_Time)
-		fmt.Fprintf(output, "git_repository: %s\n", GIT_Repository)
-		fmt.Fprintf(output, "git_branch: %s\n", GIT_Branch)
-		fmt.Fprintf(output, "git_commit_id: %s\n", GIT_CommitId)
-		fmt.Fprintf(output, "git_commit_time: %s\n", GIT_CommitTime)
+		fmt.Fprintf(output, "build_time: %s\n", build_time)
+		fmt.Fprintf(output, "git_repository: %s\n", git_repository)
+		fmt.Fprintf(output, "git_branch: %s\n", git_branch)
+		fmt.Fprintf(output, "git_commit_id: %s\n", git_commit_id)
+		fmt.Fprintf(output, "git_commit_time: %s\n", git_commit_time)
 		fmt.Fprintf(output, "```\n")
 	}
 
