@@ -1,8 +1,8 @@
 package main
 
 import (
-	// "fmt"
 	"flag"
+	"fmt"
 
 	"swagger-go/docs"
 
@@ -10,6 +10,13 @@ import (
 	"github.com/swaggo/files"
 	"github.com/swaggo/gin-swagger"
 	"github.com/swaggo/swag"
+)
+
+var (
+	BUILD_Time     string
+	GIT_Branch     string
+	GIT_CommitId   string
+	GIT_CommitTime string
 )
 
 func main() {
@@ -32,6 +39,21 @@ func main() {
 	flag.StringVar(&swagger_title, "swagger.title", "Swagger Example API", "swagger title")
 	flag.StringVar(&swagger_host, "swagger.host", "petstore.swagger.io", "swagger host")
 	flag.StringVar(&swagger_base_path, "swagger.base-path", "/app/v1", "swagger base path")
+
+	flag.Usage = func() {
+		output := flag.CommandLine.Output()
+
+		fmt.Fprintf(output, "# swagger-go (https://github.com/d2jvkpn/swagger-go)\n")
+		fmt.Fprintf(output, "\n#### Usage\n```text\n")
+		flag.PrintDefaults()
+		fmt.Fprintf(output, "```\n")
+
+		fmt.Fprintf(output, "\n#### build_infomation\n```yaml\n")
+		fmt.Fprintf(output, "build_branch: %s\n", GIT_Branch)
+		fmt.Fprintf(output, "git_commit_id: %s\n", GIT_CommitId)
+		fmt.Fprintf(output, "git_commit_time: %s\n", GIT_CommitTime)
+		fmt.Fprintf(output, "```\n")
+	}
 
 	flag.Parse()
 

@@ -9,9 +9,10 @@ command -v swag || go install github.com/swaggo/swag/cmd/swag@latest
 # - https://github.com/swaggo/swag?tab=readme-ov-file#how-to-use-it-with-gin
 # - https://github.com/swaggo/http-swagger
 
-if [[ "${_wd}" == "${_path}" ]]; then
-    echo "==> cd to target dir: ../"
-    cd ../
+if [ $# -gt 0 ]]; then
+    target_dir=$1
+    echo "==> cd to target dir: $target_dir"
+    cd $target_dir
 fi
 
 # swag_dir=swagger/docs
