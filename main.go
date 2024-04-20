@@ -14,6 +14,7 @@ import (
 
 var (
 	BUILD_Time     string
+	GIT_Repository string
 	GIT_Branch     string
 	GIT_CommitId   string
 	GIT_CommitTime string
@@ -48,8 +49,10 @@ func main() {
 		flag.PrintDefaults()
 		fmt.Fprintf(output, "```\n")
 
-		fmt.Fprintf(output, "\n#### build_infomation\n```yaml\n")
-		fmt.Fprintf(output, "build_branch: %s\n", GIT_Branch)
+		fmt.Fprintf(output, "\n#### Build\n```yaml\n")
+		fmt.Fprintf(output, "build_time: %s\n", BUILD_Time)
+		fmt.Fprintf(output, "git_repository: %s\n", GIT_Repository)
+		fmt.Fprintf(output, "git_branch: %s\n", GIT_Branch)
 		fmt.Fprintf(output, "git_commit_id: %s\n", GIT_CommitId)
 		fmt.Fprintf(output, "git_commit_time: %s\n", GIT_CommitTime)
 		fmt.Fprintf(output, "```\n")
