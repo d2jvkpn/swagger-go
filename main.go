@@ -102,10 +102,27 @@ func main() {
 		}
 	}()
 
+	// 1.
 	if err = server.Setup(); err != nil {
 		return
 	}
 
+	// 2.1
+	startup_time := time.Now().Format(time.RFC3339)
+	go_version := runtime.Version()
+	meta := map[string]*string{
+		"build_time":      &build_time,
+		"go_version":      &go_version,
+		"git_repository":  &git_repository,
+		"git_branch":      &git_branch,
+		"git_commit_id":   &git_commit_id,
+		"git_commit_time": &git_commit_time,
+		"git_tree_state":  &git_tree_state,
+
+		"startup_time": &startup_time,
+	}
+
+	// 2.2
 	swagger_path := "/swagger"
 	if server.Path != "" {
 		swagger_path = "/" + server.Path + "/swagger"
@@ -114,6 +131,15 @@ func main() {
 		ctx.Redirect(http.StatusTemporaryRedirect, ctx.FullPath()+swagger_path+"/index.html")
 	})
 
+	meta_bts, _ := json.Marshal(meta)
+	server.Engine.RouterGroup.GET("/meta", func(ctx *gin.Context) {
+		// ctx.JSON(http.StatusOK, meta)
+
+		ctx.Header("Content-Type", "application/json")
+		ctx.Writer.Write(meta_bts)
+	})
+
+	// 2.3
 	LoadSwagger(&server.Engine.RouterGroup)
 
 	// engine.Run(http_addr)
@@ -132,6 +158,7 @@ func main() {
 		logger.Error("service has been shut down", "error", e)
 	}()
 
+	// 3.
 	errch = make(chan error, 1) // the cap of the channel should be equal to number of services
 	quit = make(chan os.Signal, 1)
 	signal.Notify(quit, os.Interrupt, syscall.SIGTERM) // syscall.SIGUSR2
@@ -203,28 +230,6 @@ func (self *Server) Setup() (err error) {
 	if self.Path != "" {
 		*router = *(router.Group(self.Path))
 	}
-
-	startup_time := time.Now().Format(time.RFC3339)
-	go_version := runtime.Version()
-	meta := map[string]*string{
-		"build_time":      &build_time,
-		"go_version":      &go_version,
-		"git_repository":  &git_repository,
-		"git_branch":      &git_branch,
-		"git_commit_id":   &git_commit_id,
-		"git_commit_time": &git_commit_time,
-		"git_tree_state":  &git_tree_state,
-
-		"startup_time": &startup_time,
-	}
-
-	meta_bts, _ := json.Marshal(meta)
-	router.GET("/meta", func(ctx *gin.Context) {
-		// ctx.JSON(http.StatusOK, meta)
-
-		ctx.Header("Content-Type", "application/json")
-		ctx.Writer.Write(meta_bts)
-	})
 
 	self.Server = new(http.Server)
 	self.Server.Handler = self.Engine
