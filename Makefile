@@ -30,3 +30,4 @@ run:
 #	    rm -rf /tmp/swagger-go; \
 #	fi
 #	bash swagger-go/swag.sh
+#	./swagger-go/target/swagger-go
