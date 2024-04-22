@@ -20,7 +20,7 @@ build:
 	bash swag.sh
 
 run:
-	make build
+	bash swag.sh
 	./target/swagger-go
 
 #swag:
