@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"crypto/tls"
 	"encoding/json"
 	"errors"
@@ -108,14 +109,17 @@ func main() {
 
 	logger.Info("http server is up", "config", server)
 	go func() {
-		var err error
+		var e error
 
-		if err = server.Serve(); err != http.ErrServerClosed {
-			errch <- fmt.Errorf("http_server_down")
+		e = server.Serve()
+		if e != http.ErrServerClosed {
+			errch <- fmt.Errorf("server_closed")
 		}
+
+		logger.Error("service has been shut down", "error", e)
 	}()
 
-	errch = make(chan error, 1)
+	errch = make(chan error, 1) // the cap of the channel should be equal to number of services
 	quit = make(chan os.Signal, 1)
 	signal.Notify(quit, os.Interrupt, syscall.SIGTERM) // syscall.SIGUSR2
 
@@ -129,14 +133,20 @@ func main() {
 	case err = <-errch:
 		syncErrors(cap(errch) - 1)
 
-		logger.Error("... received from error channel", "error", err)
+		logger.Error("... received from channel", "error", err)
 	case sig := <-quit:
 		// if sig == syscall.SIGUSR2 {...}
 		// fmt.Fprintf(os.Stderr, "... received signal: %s\n", sig)
-		errch <- fmt.Errorf("shutdown")
-		syncErrors(cap(errch))
 
-		logger.Info("... quit", "signal", sig.String(), "error", err)
+		logger.Warn("... quit", "signal", sig.String())
+
+		if e := server.Shutdown(context.TODO()); e != nil {
+			logger.Error("shutdown the server", "error", e)
+		}
+		// shutdown more services
+
+		errch <- fmt.Errorf("signal: %s", sig.String())
+		syncErrors(cap(errch))
 	}
 }
 
