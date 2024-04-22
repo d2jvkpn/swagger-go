@@ -33,39 +33,39 @@ var (
 	git_tree_state  string
 )
 
+type HttpConfig struct {
+	Release bool   `json:"release"`
+	Address string `json:"address"`
+	Path    string `json:"path"`
+	TlsCert string `json:"tls_cert"`
+	TlsKey  string `json:"tls_key"`
+
+	Listener net.Listener `json:"-"`
+}
+
 func main() {
 	var (
-		release           bool
-		http_addr         string
-		http_path         string
-		tls_cert          string
-		tls_key           string
-		swagger_title     string
-		swagger_host      string
-		swagger_base_path string
-
+		config HttpConfig
 		err    error
 		errch  chan error
 		quit   chan os.Signal
 		logger *slog.Logger
-		cert   tls.Certificate
-
-		httpListener net.Listener
-		router       *gin.RouterGroup
-		engine       *gin.Engine
-		server       *http.Server
+		server *http.Server
 	)
 
-	flag.BoolVar(&release, "release", false, "run in release mode")
+	flag.BoolVar(&config.Release, "release", false, "run in release mode")
+	flag.StringVar(&config.Address, "http.addr", ":3056", "http listening address")
+	flag.StringVar(&config.Path, "http.path", "", "http base path")
+	flag.StringVar(&config.TlsCert, "tls.cert", "", "http tls cert file")
+	flag.StringVar(&config.TlsKey, "tls.key", "", "http tls key file")
 
-	flag.StringVar(&http_addr, "http.addr", ":3056", "http listening address")
-	flag.StringVar(&http_path, "http.path", "", "http base path")
-	flag.StringVar(&tls_cert, "tls.cert", "", "http tls cert file")
-	flag.StringVar(&tls_key, "tls.key", "", "http tls key file")
+	flag.StringVar(
+		&docs.SwaggerInfo.Title, "swagger.title",
+		docs.SwaggerInfo.Title, "swagger title",
+	)
 
-	flag.StringVar(&swagger_title, "swagger.title", "Swagger Example API", "swagger title")
-	flag.StringVar(&swagger_host, "swagger.host", "petstore.swagger.io", "swagger host")
-	flag.StringVar(&swagger_base_path, "swagger.base-path", "/app/v1", "swagger base path")
+	flag.StringVar(&docs.SwaggerInfo.Host, "swagger.host", docs.SwaggerInfo.Host, "swagger host")
+	flag.StringVar(&docs.SwaggerInfo.BasePath, "swagger.base-path", "/app/v1", "swagger base path")
 
 	flag.Usage = func() {
 		output := flag.CommandLine.Output()
@@ -97,88 +97,15 @@ func main() {
 		}
 	}()
 
-	if httpListener, err = net.Listen("tcp", http_addr); err != nil {
-		err = fmt.Errorf("net.Listen: %w", err)
+	if server, err = NewServer(&config); err != nil {
 		return
 	}
 
-	if release {
-		gin.SetMode(gin.ReleaseMode)
-		engine = gin.New()
-	} else {
-		engine = gin.Default()
-	}
-	engine.RedirectTrailingSlash = false
-	router = &engine.RouterGroup
-
-	http_path = strings.Trim(http_path, "/")
-	if http_path != "" {
-		*router = *(router.Group(http_path))
-	}
-
-	startup_time := time.Now().Format(time.RFC3339)
-	go_version := runtime.Version()
-	meta := map[string]*string{
-		"build_time":      &build_time,
-		"go_version":      &go_version,
-		"git_repository":  &git_repository,
-		"git_branch":      &git_branch,
-		"git_commit_id":   &git_commit_id,
-		"git_commit_time": &git_commit_time,
-		"git_tree_state":  &git_tree_state,
-
-		"startup_time": &startup_time,
-	}
-
-	meta_bts, _ := json.Marshal(meta)
-	router.GET("/meta", func(ctx *gin.Context) {
-		// ctx.JSON(http.StatusOK, meta)
-
-		ctx.Header("Content-Type", "application/json")
-		ctx.Writer.Write(meta_bts)
-	})
-
-	LoadSwagger(router, func(spec *swag.Spec) {
-		if swagger_title != "" {
-			spec.Title = swagger_title
-		}
-
-		if swagger_host != "" {
-			spec.Host = swagger_host
-		}
-
-		if swagger_base_path != "" {
-			spec.BasePath = swagger_base_path
-		}
-	})
-
-	// engine.Run(http_addr)
-
-	swagger_path := "/swagger"
-	if http_path != "" {
-		swagger_path = "/" + http_path + "/swagger"
-	}
-	engine.NoRoute(func(ctx *gin.Context) {
-		ctx.Redirect(http.StatusTemporaryRedirect, ctx.FullPath()+swagger_path+"/index.html")
-	})
-
-	server = new(http.Server)
-	server.Handler = engine
-
-	if tls_cert != "" && tls_key != "" {
-		if cert, err = tls.LoadX509KeyPair(tls_cert, tls_key); err != nil {
-			return
-		}
-		server.TLSConfig = &tls.Config{
-			Certificates: []tls.Certificate{cert},
-		}
-	}
-
-	logger.Info("http server is up", "http_addr", http_addr, "release", release)
+	logger.Info("http server is up", "config", config)
 	go func() {
 		var err error
 
-		if err = server.Serve(httpListener); err != http.ErrServerClosed {
+		if err = server.Serve(config.Listener); err != http.ErrServerClosed {
 			errch <- fmt.Errorf("http_server_down")
 		}
 	}()
@@ -208,13 +135,96 @@ func main() {
 	}
 }
 
+func NewServer(config *HttpConfig) (server *http.Server, err error) {
+	var (
+		cert   tls.Certificate
+		router *gin.RouterGroup
+		engine *gin.Engine
+	)
+
+	if config.Listener, err = net.Listen("tcp", config.Address); err != nil {
+		return nil, fmt.Errorf("net.Listen: %w", err)
+	}
+
+	if config.Release {
+		gin.SetMode(gin.ReleaseMode)
+		engine = gin.New()
+	} else {
+		engine = gin.Default()
+	}
+	engine.RedirectTrailingSlash = false
+	router = &engine.RouterGroup
+
+	config.Path = strings.Trim(config.Path, "/")
+	if config.Path != "" {
+		*router = *(router.Group(config.Path))
+	}
+
+	startup_time := time.Now().Format(time.RFC3339)
+	go_version := runtime.Version()
+	meta := map[string]*string{
+		"build_time":      &build_time,
+		"go_version":      &go_version,
+		"git_repository":  &git_repository,
+		"git_branch":      &git_branch,
+		"git_commit_id":   &git_commit_id,
+		"git_commit_time": &git_commit_time,
+		"git_tree_state":  &git_tree_state,
+
+		"startup_time": &startup_time,
+	}
+
+	meta_bts, _ := json.Marshal(meta)
+	router.GET("/meta", func(ctx *gin.Context) {
+		// ctx.JSON(http.StatusOK, meta)
+
+		ctx.Header("Content-Type", "application/json")
+		ctx.Writer.Write(meta_bts)
+	})
+
+	LoadSwagger(router)
+	// engine.Run(http_addr)
+
+	swagger_path := "/swagger"
+	if config.Path != "" {
+		swagger_path = "/" + config.Path + "/swagger"
+	}
+	engine.NoRoute(func(ctx *gin.Context) {
+		ctx.Redirect(http.StatusTemporaryRedirect, ctx.FullPath()+swagger_path+"/index.html")
+	})
+
+	server = new(http.Server)
+	server.Handler = engine
+
+	if config.TlsCert != "" && config.TlsKey != "" {
+		if cert, err = tls.LoadX509KeyPair(config.TlsCert, config.TlsKey); err != nil {
+			return
+		}
+		server.TLSConfig = &tls.Config{
+			Certificates: []tls.Certificate{cert},
+		}
+	}
+
+	return server, nil
+}
+
 func LoadSwagger(router *gin.RouterGroup, updates ...func(*swag.Spec)) {
 	// programmatically set swagger info
-	docs.SwaggerInfo.Title = "Swagger Example API"
+	if docs.SwaggerInfo.Title == "" {
+		docs.SwaggerInfo.Title = "Swagger Example API"
+	}
+
 	docs.SwaggerInfo.Description = "This is a sample server."
 	docs.SwaggerInfo.Version = "1.0"
-	docs.SwaggerInfo.Host = "petstore.swagger.io"
-	docs.SwaggerInfo.BasePath = "/v2"
+
+	if docs.SwaggerInfo.Host == "" {
+		docs.SwaggerInfo.Host = "petstore.swagger.io"
+	}
+
+	if docs.SwaggerInfo.BasePath == "" {
+		docs.SwaggerInfo.BasePath = "/v2"
+	}
+
 	docs.SwaggerInfo.Schemes = []string{"http", "https"}
 
 	if len(updates) > 0 {
