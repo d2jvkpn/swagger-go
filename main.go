@@ -141,6 +141,7 @@ func main() {
 
 	select {
 	case err = <-errch:
+		// shutdown other services
 		syncErrors(cap(errch) - 1)
 
 		logger.Error("... received from channel", "error", err)
@@ -156,7 +157,7 @@ func main() {
 		if e != nil {
 			logger.Error("shutdown the server", "error", e)
 		}
-		// shutdown more services
+		// shutdown other services
 
 		errch <- fmt.Errorf("signal: %s", sig.String())
 		syncErrors(cap(errch))
