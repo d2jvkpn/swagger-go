@@ -108,6 +108,15 @@ func main() {
 	}
 
 	// 2.1
+	swagger_path := "/swagger"
+	if server.Path != "" {
+		swagger_path = "/" + server.Path + "/swagger"
+	}
+	server.Engine.NoRoute(func(ctx *gin.Context) {
+		ctx.Redirect(http.StatusTemporaryRedirect, ctx.FullPath()+swagger_path+"/index.html")
+	})
+
+	// 2.2
 	startup_time := time.Now().Format(time.RFC3339)
 	go_version := runtime.Version()
 	meta := map[string]*string{
@@ -121,15 +130,6 @@ func main() {
 
 		"startup_time": &startup_time,
 	}
-
-	// 2.2
-	swagger_path := "/swagger"
-	if server.Path != "" {
-		swagger_path = "/" + server.Path + "/swagger"
-	}
-	server.Engine.NoRoute(func(ctx *gin.Context) {
-		ctx.Redirect(http.StatusTemporaryRedirect, ctx.FullPath()+swagger_path+"/index.html")
-	})
 
 	meta_bts, _ := json.Marshal(meta)
 	server.Engine.RouterGroup.GET("/meta", func(ctx *gin.Context) {
