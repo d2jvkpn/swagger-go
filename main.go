@@ -258,8 +258,8 @@ func LoadSwagger(router *gin.RouterGroup, updates ...func(*swag.Spec)) {
 
 	docs.SwaggerInfo.Schemes = []string{"http", "https"}
 
-	if len(updates) > 0 {
-		updates[0](docs.SwaggerInfo)
+	for i := 0; i < len(updates); i++ {
+		updates[i](docs.SwaggerInfo)
 	}
 
 	// router.GET("/", func(ctx *gin.Context) {
