@@ -2,6 +2,7 @@ package main
 
 import (
 	"crypto/tls"
+	"encoding/json"
 	"errors"
 	"flag"
 	"fmt"
@@ -13,6 +14,7 @@ import (
 	"runtime"
 	"strings"
 	"syscall"
+	"time"
 
 	"swagger-go/docs"
 
@@ -114,18 +116,26 @@ func main() {
 		*router = *(router.Group(http_path))
 	}
 
-	meta := map[string]string{
-		"build_time":      build_time,
-		"go_version":      runtime.Version(),
-		"git_repository":  git_repository,
-		"git_branch":      git_branch,
-		"git_commit_id":   git_commit_id,
-		"git_commit_time": git_commit_time,
-		"git_tree_state":  git_tree_state,
+	startup_time := time.Now().Format(time.RFC3339)
+	go_version := runtime.Version()
+	meta := map[string]*string{
+		"build_time":      &build_time,
+		"go_version":      &go_version,
+		"git_repository":  &git_repository,
+		"git_branch":      &git_branch,
+		"git_commit_id":   &git_commit_id,
+		"git_commit_time": &git_commit_time,
+		"git_tree_state":  &git_tree_state,
+
+		"startup_time": &startup_time,
 	}
 
+	meta_bts, _ := json.Marshal(meta)
 	router.GET("/meta", func(ctx *gin.Context) {
-		ctx.JSON(http.StatusOK, meta)
+		// ctx.JSON(http.StatusOK, meta)
+
+		ctx.Header("Content-Type", "application/json")
+		ctx.Writer.Write(meta_bts)
 	})
 
 	LoadSwagger(router, func(spec *swag.Spec) {
