@@ -112,7 +112,7 @@ func main() {
 		var e error
 
 		e = server.Serve()
-		if e != http.ErrServerClosed {
+		if e != nil && !errors.Is(e, http.ErrServerClosed) { // e != http.ErrServerClosed
 			errch <- fmt.Errorf("server_closed")
 		}
 
@@ -122,6 +122,16 @@ func main() {
 	errch = make(chan error, 1) // the cap of the channel should be equal to number of services
 	quit = make(chan os.Signal, 1)
 	signal.Notify(quit, os.Interrupt, syscall.SIGTERM) // syscall.SIGUSR2
+
+	//	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
+	//	defer stop()
+	//	go func() {
+	//		e := srv.ListenAndServe()
+	//		if e != nil && !errors.Is(e, http.ErrServerClosed) {
+	//			logger.Error("listen and serve", "error", e)
+	//		}
+	//	}()
+	//	<-ctx.Done()
 
 	syncErrors := func(num int) {
 		for i := 0; i < num; i++ {
@@ -140,7 +150,10 @@ func main() {
 
 		logger.Warn("... quit", "signal", sig.String())
 
-		if e := server.Shutdown(context.TODO()); e != nil {
+		ctx, cancel := context.WithTimeout(context.TODO(), 5*time.Second)
+		e := server.Shutdown(ctx)
+		cancel()
+		if e != nil {
 			logger.Error("shutdown the server", "error", e)
 		}
 		// shutdown more services
