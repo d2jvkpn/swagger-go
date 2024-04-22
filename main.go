@@ -104,17 +104,24 @@ func main() {
 		return
 	}
 
+	swagger_path := "/swagger"
+	if server.Path != "" {
+		swagger_path = "/" + server.Path + "/swagger"
+	}
+	server.Engine.NoRoute(func(ctx *gin.Context) {
+		ctx.Redirect(http.StatusTemporaryRedirect, ctx.FullPath()+swagger_path+"/index.html")
+	})
 	LoadSwagger(&server.Engine.RouterGroup)
-	// engine.Run(http_addr)
 
+	// engine.Run(http_addr)
 	logger.Info("http server is up", "config", server)
 	go func() {
 		var e error
 
 		e = server.Serve()
-		if e != nil && !errors.Is(e, http.ErrServerClosed) { // e != http.ErrServerClosed
-			errch <- fmt.Errorf("server_closed")
-		}
+		// errors.Is(e, http.ErrServerClosed)
+		// e != http.ErrServerClosed
+		errch <- fmt.Errorf("server_closed")
 
 		logger.Error("service has been shut down", "error", e)
 	}()
@@ -133,18 +140,19 @@ func main() {
 	//	}()
 	//	<-ctx.Done()
 
-	syncErrors := func(num int) {
-		for i := 0; i < num; i++ {
+	syncErrors := func(count int) {
+		for i := 0; i < count; i++ {
 			err = errors.Join(err, <-errch)
 		}
 	}
 
+	count := cap(errch)
 	select {
 	case err = <-errch:
-		// shutdown other services
-		syncErrors(cap(errch) - 1)
-
 		logger.Error("... received from channel", "error", err)
+		// shutdown other services
+
+		count -= 1
 	case sig := <-quit:
 		// if sig == syscall.SIGUSR2 {...}
 		// fmt.Fprintf(os.Stderr, "... received signal: %s\n", sig)
@@ -159,9 +167,11 @@ func main() {
 		}
 		// shutdown other services
 
-		errch <- fmt.Errorf("signal: %s", sig.String())
-		syncErrors(cap(errch))
+		// errch <- fmt.Errorf("signal: %s", sig.String())
 	}
+
+	logger.Warn("sync errors", "count", count)
+	syncErrors(count)
 }
 
 func (self *Server) Setup() (err error) {
@@ -208,14 +218,6 @@ func (self *Server) Setup() (err error) {
 
 		ctx.Header("Content-Type", "application/json")
 		ctx.Writer.Write(meta_bts)
-	})
-
-	swagger_path := "/swagger"
-	if self.Path != "" {
-		swagger_path = "/" + self.Path + "/swagger"
-	}
-	self.Engine.NoRoute(func(ctx *gin.Context) {
-		ctx.Redirect(http.StatusTemporaryRedirect, ctx.FullPath()+swagger_path+"/index.html")
 	})
 
 	self.Server = new(http.Server)
@@ -269,7 +271,7 @@ func LoadSwagger(router *gin.RouterGroup, updates ...func(*swag.Spec)) {
 
 /*
 
-// example_01: Hello godoc
+//	example_01: Hello godoc
 //
 //	@Summary		Show an account
 //	@Description	get string by ID
