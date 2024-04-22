@@ -165,13 +165,15 @@ func main() {
 		logger.Warn("... received signal", "signal", sig.String())
 		// if sig == syscall.SIGUSR2 {...} // works on linux only
 
+		// 1. shutdow http server
 		ctx, cancel := context.WithTimeout(context.TODO(), 5*time.Second)
 		e := server.Shutdown(ctx)
 		cancel()
 		if e != nil {
 			logger.Error("shutdown the server", "error", e)
 		}
-		// shutdown other services
+
+		// 2. shutdown other services
 
 		// errch <- fmt.Errorf("signal: %s", sig.String())
 		syncErrors(cap(errch))
@@ -195,8 +197,8 @@ func (self *Server) Setup() (err error) {
 		self.Engine = gin.Default()
 	}
 	self.Engine.RedirectTrailingSlash = false
-	router = &self.Engine.RouterGroup
 
+	router = &self.Engine.RouterGroup
 	self.Path = strings.Trim(self.Path, "/")
 	if self.Path != "" {
 		*router = *(router.Group(self.Path))
@@ -275,7 +277,7 @@ func LoadSwagger(router *gin.RouterGroup, updates ...func(*swag.Spec)) {
 
 /*
 
-//	example_01: Hello godoc
+//	e01: Hello godoc
 //
 //	@Summary		Show an account
 //	@Description	get string by ID
