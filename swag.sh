@@ -22,7 +22,8 @@ swag fmt --dir $swag_dir # --exclude ./internal
 echo "<== swag done"
 
 ####
-build_time=$(date +'%FT%T.%N%:z')
+# build_time=$(date +'%FT%T.%N%:z')
+build_time=$(date +'%FT%T%:z')
 git_repository=$(git config --get remote.origin.url)
 git_branch=$(git rev-parse --abbrev-ref HEAD)
 git_commit_id=$(git rev-parse --verify HEAD)
