@@ -29,4 +29,4 @@ run:
 #	    rsync -arvP --exclude .git /tmp/swagger-go ./; \
 #	    rm -rf /tmp/swagger-go; \
 #	fi
-#	bash swagger-go/swag.sh $(shell pwd)
+#	bash swagger-go/swag.sh
