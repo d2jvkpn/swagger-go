@@ -97,6 +97,8 @@ func main() {
 		if err != nil {
 			logger.Error("exit", "error", err)
 			os.Exit(1)
+		} else {
+			logger.Info("exit")
 		}
 	}()
 
@@ -111,6 +113,7 @@ func main() {
 	server.Engine.NoRoute(func(ctx *gin.Context) {
 		ctx.Redirect(http.StatusTemporaryRedirect, ctx.FullPath()+swagger_path+"/index.html")
 	})
+
 	LoadSwagger(&server.Engine.RouterGroup)
 
 	// engine.Run(http_addr)
@@ -119,9 +122,12 @@ func main() {
 		var e error
 
 		e = server.Serve()
-		// errors.Is(e, http.ErrServerClosed)
 		// e != http.ErrServerClosed
-		errch <- fmt.Errorf("server_closed")
+		if e != nil && !errors.Is(e, http.ErrServerClosed) {
+			errch <- e
+		} else {
+			errch <- nil
+		}
 
 		logger.Error("service has been shut down", "error", e)
 	}()
@@ -130,6 +136,8 @@ func main() {
 	quit = make(chan os.Signal, 1)
 	signal.Notify(quit, os.Interrupt, syscall.SIGTERM) // syscall.SIGUSR2
 
+	//	link: https://dev.to/antonkuklin/golang-graceful-shutdown-3n6d
+	//
 	//	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	//	defer stop()
 	//	go func() {
@@ -141,23 +149,21 @@ func main() {
 	//	<-ctx.Done()
 
 	syncErrors := func(count int) {
+		logger.Warn("sync errors", "count", count)
 		for i := 0; i < count; i++ {
 			err = errors.Join(err, <-errch)
 		}
 	}
 
-	count := cap(errch)
 	select {
 	case err = <-errch:
-		logger.Error("... received from channel", "error", err)
+		logger.Error("... received error", "error", err)
 		// shutdown other services
 
-		count -= 1
+		syncErrors(cap(errch) - 1)
 	case sig := <-quit:
-		// if sig == syscall.SIGUSR2 {...}
-		// fmt.Fprintf(os.Stderr, "... received signal: %s\n", sig)
-
-		logger.Warn("... quit", "signal", sig.String())
+		logger.Warn("... received signal", "signal", sig.String())
+		// if sig == syscall.SIGUSR2 {...} // works on linux only
 
 		ctx, cancel := context.WithTimeout(context.TODO(), 5*time.Second)
 		e := server.Shutdown(ctx)
@@ -168,10 +174,8 @@ func main() {
 		// shutdown other services
 
 		// errch <- fmt.Errorf("signal: %s", sig.String())
+		syncErrors(cap(errch))
 	}
-
-	logger.Warn("sync errors", "count", count)
-	syncErrors(count)
 }
 
 func (self *Server) Setup() (err error) {
