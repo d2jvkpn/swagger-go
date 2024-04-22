@@ -10,6 +10,8 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"runtime"
+	"strings"
 	"syscall"
 
 	"swagger-go/docs"
@@ -26,6 +28,7 @@ var (
 	git_branch      string
 	git_commit_id   string
 	git_commit_time string
+	git_tree_state  string
 )
 
 func main() {
@@ -72,10 +75,12 @@ func main() {
 
 		fmt.Fprintf(output, "\n#### Build\n```yaml\n")
 		fmt.Fprintf(output, "build_time: %s\n", build_time)
+		fmt.Fprintf(output, "go_version: %s\n", runtime.Version())
 		fmt.Fprintf(output, "git_repository: %s\n", git_repository)
 		fmt.Fprintf(output, "git_branch: %s\n", git_branch)
 		fmt.Fprintf(output, "git_commit_id: %s\n", git_commit_id)
 		fmt.Fprintf(output, "git_commit_time: %s\n", git_commit_time)
+		fmt.Fprintf(output, "git_tree_state: %s\n", git_tree_state)
 		fmt.Fprintf(output, "```\n")
 	}
 
@@ -104,9 +109,24 @@ func main() {
 	engine.RedirectTrailingSlash = false
 	router = &engine.RouterGroup
 
+	http_path = strings.Trim(http_path, "/")
 	if http_path != "" {
 		*router = *(router.Group(http_path))
 	}
+
+	meta := map[string]string{
+		"build_time":      build_time,
+		"go_version":      runtime.Version(),
+		"git_repository":  git_repository,
+		"git_branch":      git_branch,
+		"git_commit_id":   git_commit_id,
+		"git_commit_time": git_commit_time,
+		"git_tree_state":  git_tree_state,
+	}
+
+	router.GET("/meta", func(ctx *gin.Context) {
+		ctx.JSON(http.StatusOK, meta)
+	})
 
 	LoadSwagger(router, func(spec *swag.Spec) {
 		if swagger_title != "" {
@@ -122,9 +142,18 @@ func main() {
 		}
 	})
 
-	// engine.Run(addr)
+	// engine.Run(http_addr)
+
+	swagger_path := "/swagger"
+	if http_path != "" {
+		swagger_path = "/" + http_path + "/swagger"
+	}
+	engine.NoRoute(func(ctx *gin.Context) {
+		ctx.Redirect(http.StatusTemporaryRedirect, ctx.FullPath()+swagger_path+"/index.html")
+	})
 
 	server = new(http.Server)
+	server.Handler = engine
 
 	if tls_cert != "" && tls_key != "" {
 		if cert, err = tls.LoadX509KeyPair(tls_cert, tls_key); err != nil {
@@ -135,6 +164,7 @@ func main() {
 		}
 	}
 
+	logger.Info("http server is up", "http_addr", http_addr, "release", release)
 	go func() {
 		var err error
 
@@ -181,15 +211,11 @@ func LoadSwagger(router *gin.RouterGroup, updates ...func(*swag.Spec)) {
 		updates[0](docs.SwaggerInfo)
 	}
 
-	/*
-		// "/swagger"
-		router.GET("/", func(ctx *gin.Context) {
-			ctx.Redirect(http.StatusTemporaryRedirect, ctx.FullPath()+"/index.html")
-		})
-	*/
+	// router.GET("/", func(ctx *gin.Context) {
+	// 	ctx.Redirect(http.StatusTemporaryRedirect, ctx.FullPath()+"/swagger/index.html")
+	// })
 
-	// "/swagger/*any"
-	router.GET("/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 }
 
 /*

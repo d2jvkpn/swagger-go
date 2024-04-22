@@ -31,6 +31,7 @@ build:
 	ls -alh target/
 
 run:
+	make build
 	./target/swagger-go
 
 #swag:
