@@ -94,6 +94,7 @@ func main() {
 
 	defer func() {
 		if err != nil {
+			logger.Error("exit", "error", err)
 			os.Exit(1)
 		}
 	}()
