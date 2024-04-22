@@ -33,31 +33,32 @@ var (
 	git_tree_state  string
 )
 
-type HttpConfig struct {
+type Server struct {
 	Release bool   `json:"release"`
 	Address string `json:"address"`
 	Path    string `json:"path"`
 	TlsCert string `json:"tls_cert"`
 	TlsKey  string `json:"tls_key"`
 
-	Listener net.Listener `json:"-"`
+	listener net.Listener
+	Engine   *gin.Engine `json:"-"`
+	*http.Server
 }
 
 func main() {
 	var (
-		config HttpConfig
+		server Server
 		err    error
 		errch  chan error
 		quit   chan os.Signal
 		logger *slog.Logger
-		server *http.Server
 	)
 
-	flag.BoolVar(&config.Release, "release", false, "run in release mode")
-	flag.StringVar(&config.Address, "http.addr", ":3056", "http listening address")
-	flag.StringVar(&config.Path, "http.path", "", "http base path")
-	flag.StringVar(&config.TlsCert, "tls.cert", "", "http tls cert file")
-	flag.StringVar(&config.TlsKey, "tls.key", "", "http tls key file")
+	flag.BoolVar(&server.Release, "release", false, "run in release mode")
+	flag.StringVar(&server.Address, "http.addr", ":3056", "http listening address")
+	flag.StringVar(&server.Path, "http.path", "", "http base path")
+	flag.StringVar(&server.TlsCert, "tls.cert", "", "http tls cert file")
+	flag.StringVar(&server.TlsKey, "tls.key", "", "http tls key file")
 
 	flag.StringVar(
 		&docs.SwaggerInfo.Title, "swagger.title",
@@ -97,15 +98,18 @@ func main() {
 		}
 	}()
 
-	if server, err = NewServer(&config); err != nil {
+	if err = server.Setup(); err != nil {
 		return
 	}
 
-	logger.Info("http server is up", "config", config)
+	LoadSwagger(&server.Engine.RouterGroup)
+	// engine.Run(http_addr)
+
+	logger.Info("http server is up", "config", server)
 	go func() {
 		var err error
 
-		if err = server.Serve(config.Listener); err != http.ErrServerClosed {
+		if err = server.Serve(); err != http.ErrServerClosed {
 			errch <- fmt.Errorf("http_server_down")
 		}
 	}()
@@ -135,29 +139,28 @@ func main() {
 	}
 }
 
-func NewServer(config *HttpConfig) (server *http.Server, err error) {
+func (self *Server) Setup() (err error) {
 	var (
 		cert   tls.Certificate
 		router *gin.RouterGroup
-		engine *gin.Engine
 	)
 
-	if config.Listener, err = net.Listen("tcp", config.Address); err != nil {
-		return nil, fmt.Errorf("net.Listen: %w", err)
+	if self.listener, err = net.Listen("tcp", self.Address); err != nil {
+		return fmt.Errorf("net.Listen: %w", err)
 	}
 
-	if config.Release {
+	if self.Release {
 		gin.SetMode(gin.ReleaseMode)
-		engine = gin.New()
+		self.Engine = gin.New()
 	} else {
-		engine = gin.Default()
+		self.Engine = gin.Default()
 	}
-	engine.RedirectTrailingSlash = false
-	router = &engine.RouterGroup
+	self.Engine.RedirectTrailingSlash = false
+	router = &self.Engine.RouterGroup
 
-	config.Path = strings.Trim(config.Path, "/")
-	if config.Path != "" {
-		*router = *(router.Group(config.Path))
+	self.Path = strings.Trim(self.Path, "/")
+	if self.Path != "" {
+		*router = *(router.Group(self.Path))
 	}
 
 	startup_time := time.Now().Format(time.RFC3339)
@@ -182,30 +185,31 @@ func NewServer(config *HttpConfig) (server *http.Server, err error) {
 		ctx.Writer.Write(meta_bts)
 	})
 
-	LoadSwagger(router)
-	// engine.Run(http_addr)
-
 	swagger_path := "/swagger"
-	if config.Path != "" {
-		swagger_path = "/" + config.Path + "/swagger"
+	if self.Path != "" {
+		swagger_path = "/" + self.Path + "/swagger"
 	}
-	engine.NoRoute(func(ctx *gin.Context) {
+	self.Engine.NoRoute(func(ctx *gin.Context) {
 		ctx.Redirect(http.StatusTemporaryRedirect, ctx.FullPath()+swagger_path+"/index.html")
 	})
 
-	server = new(http.Server)
-	server.Handler = engine
+	self.Server = new(http.Server)
+	self.Server.Handler = self.Engine
 
-	if config.TlsCert != "" && config.TlsKey != "" {
-		if cert, err = tls.LoadX509KeyPair(config.TlsCert, config.TlsKey); err != nil {
+	if self.TlsCert != "" && self.TlsKey != "" {
+		if cert, err = tls.LoadX509KeyPair(self.TlsCert, self.TlsKey); err != nil {
 			return
 		}
-		server.TLSConfig = &tls.Config{
+		self.TLSConfig = &tls.Config{
 			Certificates: []tls.Certificate{cert},
 		}
 	}
 
-	return server, nil
+	return nil
+}
+
+func (self *Server) Serve() (err error) {
+	return self.Server.Serve(self.listener)
 }
 
 func LoadSwagger(router *gin.RouterGroup, updates ...func(*swag.Spec)) {
