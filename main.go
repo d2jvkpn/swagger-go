@@ -41,9 +41,9 @@ type Server struct {
 	TlsCert string `json:"tls_cert"`
 	TlsKey  string `json:"tls_key"`
 
-	listener net.Listener
-	Engine   *gin.Engine `json:"-"`
-	*http.Server
+	listener     net.Listener
+	Engine       *gin.Engine `json:"-"`
+	*http.Server `json:"-"`
 }
 
 func main() {
