@@ -184,12 +184,12 @@ func main() {
 
 	select {
 	case err = <-errch:
-		logger.Error("... received error", "error", err)
+		logger.Error("... received from channel errch")
 		// shutdown other services
 
 		syncErrors(cap(errch) - 1)
 	case sig := <-quit:
-		logger.Warn("... received signal", "signal", sig.String())
+		logger.Warn("... received from channel quit", "signal", sig.String())
 		// if sig == syscall.SIGUSR2 {...} // works on linux only
 
 		// 1. shutdow http server
