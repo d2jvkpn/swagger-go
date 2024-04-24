@@ -3,7 +3,7 @@ set -eu -o pipefail # -x
 _wd=$(pwd); _path=$(dirname $0 | xargs -i readlink -f {})
 
 export IMAGE_Tag=$1 APP_Tag=$2 HTTP_Port=$3
-export APP_Name=$(yq .app project.yaml)
+export APP_Name=$(yq .app_name project.yaml)
 export USER_UID=$(id -u) USER_GID=$(id -g)
 
 container=${APP_Name}_${APP_Tag}

@@ -23,7 +23,7 @@ run:
 	bash swag.sh
 	./target/swagger-go
 
-build-image:
+build-image_cn:
 	BUILD_Region=cn DOCKER_Tag=dev bash deployments/docker_build.sh main
 
 #swag-update:

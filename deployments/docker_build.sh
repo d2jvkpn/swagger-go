@@ -7,7 +7,7 @@ _wd=$(pwd); _path=$(dirname $0 | xargs -i readlink -f {})
 
 git_branch=$1
 
-app_name=$(yq .app project.yaml)
+app_name=$(yq .app_name project.yaml)
 app_version=$(yq .version project.yaml)
 image_name=$(yq .image_name project.yaml)
 
