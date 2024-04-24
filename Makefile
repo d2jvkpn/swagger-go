@@ -16,12 +16,15 @@ go:
 	go fmt ./...
 	go vet ./...
 
-build:
+build-local:
 	bash swag.sh
 
 run:
 	bash swag.sh
 	./target/swagger-go
+
+build-image:
+	BUILD_Region=cn DOCKER_Tag=dev bash deployments/docker_build.sh main
 
 #swag-update:
 #	@if [ ! -d "swagger-go" ]; then \

@@ -1,0 +1,17 @@
+version: '3'
+
+services:
+  swagger-go:
+    image: registry.cn-shanghai.aliyuncs.com/d2jvkpn/${APP_Name}:${IMAGE_Tag}
+    restart: always
+    container_name: ${APP_Name}_${APP_Tag}
+    user: "${USER_UID}:${USER_GID}"
+    # networks: ["net"]
+    network_mode: bridge
+    ports: ["${HTTP_Port}:${HTTP_Port}"]
+    environment: ["TZ=Asia/Shanghai"]
+    # volumes:
+    command: ["./target/main", "-release", "-http.addr=:${HTTP_Port}"]
+
+# networks:
+#   net: { name: "${APP_Name}_${APP_Tag}", driver: bridge, external: false }
