@@ -1,8 +1,8 @@
 version: '3'
 
 services:
-  swagger-go:
-    image: registry.cn-shanghai.aliyuncs.com/d2jvkpn/${APP_Name}:${IMAGE_Tag}
+  ${APP_Name}:
+    image: ${APP_Name}:${IMAGE_Tag}
     restart: always
     container_name: ${APP_Name}_${APP_Tag}
     user: "${USER_UID}:${USER_GID}"
