@@ -3,6 +3,7 @@ set -eu -o pipefail # -x
 _wd=$(pwd); _path=$(dirname $0 | xargs -i readlink -f {})
 
 export IMAGE_Tag=$1 APP_Tag=$2 HTTP_Port=$3
+export IMAGE_Name=$(yq .image_name project.yaml)
 export APP_Name=$(yq .app_name project.yaml)
 export USER_UID=$(id -u) USER_GID=$(id -g)
 
@@ -18,5 +19,6 @@ envsubst < ${_path}/docker_deploy.yaml > docker-compose.yaml
 USER_UID=$USER_UID USER_GID=$USER_GID docker-compose up -d
 
 exit 0
+
 docker stop $container && docker stop $container
 docker rm -f $container
