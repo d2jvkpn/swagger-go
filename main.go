@@ -289,10 +289,10 @@ func LoadSwagger(router *gin.RouterGroup, updates ...func(*swag.Spec)) {
 //	@Tags			accounts
 //	@Accept			json
 //	@Produce		json
-//	@Param	id		path	int			true	"Account ID"
-//	@Param	name	query	string		flase	"Account Name"
-//	@Param	request	body	LoginUser	true	"user password"
-//	@Success		200	{object}	SwagLoginResponse
+//	@Param	id		path	int		true	"Account ID"
+//	@Param	name	query	string	flase	"Account Name"
+//	@Param	request	body	Login	true	"user password"
+//	@Success		200	{object}	LoginResponse
 //	@Failure		400	{object}	error
 //	@Failure		404	{object}	error
 //	@Failure		500	{object}	error
@@ -301,7 +301,12 @@ func Hello(ctx *gin.Context) {
 	// TODO: ...
 }
 
-type SwagLoginResponse struct {
+// User Login Body
+//
+// @description	phone, email, name
+// @description	xxxx
+type Login struct {
+	// User Email address
 	Email    string `json:"email,omitempty" example:"john@noreply.local"`
 	Name     string `json:"name,omitempty" example:"John Doe" minLength:"2" maxLength:"24"`
 	Age      int    `json:"age" example:"2" minimum:"1" maximum:"20"`
