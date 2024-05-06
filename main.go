@@ -291,14 +291,22 @@ func LoadSwagger(router *gin.RouterGroup, updates ...func(*swag.Spec)) {
 //	@Produce		json
 //	@Param	id		path	int			true	"Account ID"
 //	@Param	name	query	string		flase	"Account Name"
-//	@Param	login	body	LoginUser	true	"user password"
-//	@Success		200	{object}	Response
+//	@Param	request	body	LoginUser	true	"user password"
+//	@Success		200	{object}	SwagLoginResponse
 //	@Failure		400	{object}	error
 //	@Failure		404	{object}	error
 //	@Failure		500	{object}	error
 //	@Router			/accounts/{id}	[get]
 func Hello(ctx *gin.Context) {
 	// TODO: ...
+}
+
+type SwagLoginResponse struct {
+	Email    string `json:"email,omitempty" example:"john@noreply.local"`
+	Name     string `json:"name,omitempty" example:"John Doe" minLength:"2" maxLength:"24"`
+	Age      int    `json:"age" example:"2" minimum:"1" maximum:"20"`
+	Role     string `json:"role,omitempty" enums:"admin, maintainer, owner"`
+	Password string `json:"password" example:"acbABC123" minLength:"8" maxLength:"24"`
 }
 
 */

@@ -6,6 +6,7 @@
 - https://github.com/swaggo
 - https://github.com/swaggo/swag?tab=readme-ov-file#how-to-use-it-with-gin
 - https://github.com/swaggo/http-swagger
+- https://www.linkedin.com/pulse/swagger-go-pragmatic-guide-phuong-le-2gbhc
 
 #### P2. Append to Makefile
 ```bash
