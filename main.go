@@ -282,21 +282,21 @@ func LoadSwagger(router *gin.RouterGroup, updates ...func(*swag.Spec)) {
 
 /*
 
-//	e01: Hello godoc
+// e01: Hello godoc
 //
-//	@Summary		Show an account
-//	@Description	get string by ID
-//	@Tags			accounts
-//	@Accept			json
-//	@Produce		json
-//	@Param	id		path	int		true	"Account ID"
-//	@Param	name	query	string	flase	"Account Name"
-//	@Param	request	body	Login	true	"user password"
-//	@Success		200	{object}	LoginResponse
-//	@Failure		400	{object}	error
-//	@Failure		404	{object}	error
-//	@Failure		500	{object}	error
-//	@Router			/accounts/{id}	[get]
+// @Summary		Show an account
+// @Description	get string by ID
+// @Tags			accounts
+// @Accept			json
+// @Produce		json
+// @Param	id		path	int		true	"Account ID"
+// @Param	name	query	string	flase	"Account Name"
+// @Param	request	body	Login	true	"user password"
+// @Success		200	{object}	LoginResponse
+// @Failure		400	{object}	error
+// @Failure		404	{object}	error
+// @Failure		500	{object}	error
+// @Router			/accounts/{id}	[get]
 func Hello(ctx *gin.Context) {
 	// TODO: ...
 }
@@ -312,6 +312,9 @@ type Login struct {
 	Age      int    `json:"age" example:"2" minimum:"1" maximum:"20"`
 	Role     string `json:"role,omitempty" enums:"admin, maintainer, owner"`
 	Password string `json:"password" example:"acbABC123" minLength:"8" maxLength:"24"`
+
+	// Option<map[string]any>: response data
+	Data map[string]any `json:"data,omitempty" swaggertype:"object,string" example:"ans:hello,value:42"`
 }
 
 */
