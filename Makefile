@@ -17,11 +17,11 @@ go:
 	go vet ./...
 
 build-local:
-	bash swag.sh
+	bash swag.sh APP_swagger-go
 
 run:
 	bash swag.sh
-	./target/swagger-go
+	./target/swagger-go -swagger.title "Swagger for APP"
 
 build-image_cn:
 	BUILD_Region=cn DOCKER_Tag=dev bash deployments/docker_build.sh main
