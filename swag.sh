@@ -5,6 +5,8 @@ _wd=$(pwd); _path=$(dirname $0 | xargs -i readlink -f {})
 ####
 command -v swag || go install github.com/swaggo/swag/cmd/swag@latest
 
+name=${1:-swagger-go}
+
 # swag_dir=swagger-go/docs
 swag_dir=${_path}/docs
 echo "==> swag dir: $swag_dir"
@@ -45,4 +47,4 @@ echo "==> $GO_ldflags"
 
 set -x
 
-go build -ldflags="-w -s $GO_ldflags" -o target/swagger-go main.go
+go build -ldflags="-w -s $GO_ldflags" -o target/$name main.go
