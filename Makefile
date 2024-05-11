@@ -29,11 +29,10 @@ build-image_cn:
 #swag-update:
 #	@if [ ! -d "swagger-go" ]; then \
 #	    git clone git@github.com:d2jvkpn/swagger-go.git /tmp/swagger-go; \
-#	    rsync -arvP --exclude .git /tmp/swagger-go ./; \
-#	    rm -rf /tmp/swagger-go; \
+#	    rsync -arvP --exclude .git /tmp/swagger-go ./swagger; \
 #	fi
-#	bash swagger-go/swag.sh
+#	bash swagger/swag.sh
 
 #swag-run:
-#	bash swagger-go/swag.sh
-#	./swagger-go/target/swagger-go
+#	bash swagger/swag.sh
+#	./swagger/target/swagger-go
