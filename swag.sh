@@ -38,7 +38,7 @@ unpushed=$(git diff origin/$git_branch..HEAD --name-status)
 mkdir -p target
 
 GO_ldflags="-X main.build_time=$build_time \
-  -x main.build_hostname=$build_hostname
+  -x main.build_hostname=$build_hostname \
   -X main.git_repository=$git_repository \
   -X main.git_branch=$git_branch \
   -X main.git_commit_id=$git_commit_id \
