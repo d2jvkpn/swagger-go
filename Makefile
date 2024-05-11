@@ -27,7 +27,7 @@ build-image_cn:
 	BUILD_Region=cn DOCKER_Tag=dev bash deployments/docker_build.sh main
 
 #swag-update:
-#	@if [ ! -d "swagger-go" ]; then \
+#	@if [ ! -d "swagger" ]; then \
 #	    git clone git@github.com:d2jvkpn/swagger-go.git /tmp/swagger-go; \
 #	    rsync -arvP --exclude .git /tmp/swagger-go ./swagger; \
 #	fi
