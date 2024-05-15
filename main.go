@@ -27,6 +27,7 @@ import (
 
 var (
 	build_time      string
+	build_host      string
 	git_repository  string
 	git_branch      string
 	git_commit_id   string
@@ -79,6 +80,7 @@ func main() {
 
 		fmt.Fprintf(output, "\n#### Build\n```yaml\n")
 		fmt.Fprintf(output, "build_time: %s\n", build_time)
+		fmt.Fprintf(output, "build_host: %s\n", build_host)
 		fmt.Fprintf(output, "go_version: %s\n", runtime.Version())
 		fmt.Fprintf(output, "git_repository: %s\n", git_repository)
 		fmt.Fprintf(output, "git_branch: %s\n", git_branch)
@@ -310,8 +312,9 @@ type Login struct {
 	Email    string `json:"email,omitempty" example:"john@noreply.local"`
 	Name     string `json:"name,omitempty" example:"John Doe" minLength:"2" maxLength:"24"`
 	Age      int    `json:"age" example:"2" minimum:"1" maximum:"20"`
-	Role     string `json:"role,omitempty" enums:"admin, maintainer, owner"`
+	Role     string `json:"role,omitempty" enums:"admin, maintainer, owner" binding:"required,oneof=admin maintainer owner"`
 	Password string `json:"password" example:"acbABC123" minLength:"8" maxLength:"24"`
+	Date string `json:"date,omitempty" binding:"required" time_format:"2006-01-02"`
 
 	// Option<map[string]any>: response data
 	Data map[string]any `json:"data,omitempty" swaggertype:"object,string" example:"ans:hello,value:42"`
