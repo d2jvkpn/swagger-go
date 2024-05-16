@@ -21,7 +21,7 @@ cd ${_path}
 
 # build_time=$(date +'%FT%T.%N%:z')
 build_time=$(date +'%FT%T%:z')
-build_hostname=$(hostname)
+build_host=$(hostname)
 git_repository=$(git config --get remote.origin.url)
 git_branch=$(git rev-parse --abbrev-ref HEAD)
 git_commit_id=$(git rev-parse --verify HEAD)
@@ -38,7 +38,7 @@ unpushed=$(git diff origin/$git_branch..HEAD --name-status)
 mkdir -p target
 
 GO_ldflags="-X main.build_time=$build_time \
-  -X main.build_hostname=$build_hostname \
+  -X main.build_host=$build_host \
   -X main.git_repository=$git_repository \
   -X main.git_branch=$git_branch \
   -X main.git_commit_id=$git_commit_id \
