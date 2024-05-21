@@ -18,11 +18,11 @@ go-lint:
 	go vet ./...
 
 go-build:
-	bash swag.sh APP_swagger-go
+	bash swag.sh APP-swagger
 
 go-run:
-	bash swag.sh
-	./target/swagger-go -swagger.title "Swagger for APP"
+	bash swag.sh APP-swagger
+	./target/APP-swagger -swagger.title "APP Swagger"
 
 image-cn:
 	BUILD_Region=cn DOCKER_Tag=dev bash deployments/docker_build.sh main
