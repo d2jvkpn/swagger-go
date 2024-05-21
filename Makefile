@@ -32,8 +32,8 @@ image-cn:
 #	    git clone git@github.com:d2jvkpn/swagger-go.git /tmp/swagger-go; \
 #	    rsync -arvP --exclude .git /tmp/swagger-go ./swagger; \
 #	fi
-#	bash swagger/swag.sh
+#	bash swagger/swag.sh APP-swagger
 
 #swag-run:
 #	bash swagger/swag.sh
-#	./swagger/target/swagger-go
+#	./swagger/target/APP-swagger
