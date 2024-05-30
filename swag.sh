@@ -12,7 +12,7 @@ swag_dir=${_path}/docs
 echo "==> swag dir: $swag_dir"
 
 swag init --output $swag_dir
-swag fmt --dir $swag_dir # --exclude ./internal
+swag fmt --dir $swag_dir --exclude ./vendor
 
 echo "<== swag done"
 
