@@ -11,16 +11,16 @@ git_branch = $(shell git rev-parse --abbrev-ref HEAD)
 git_commit_id = $(shell git rev-parse --verify HEAD)
 git_commit_time = $(shell git log -1 --format="%at" | xargs -I{} date -d @{} +%FT%T%:z)
 
-go-lint:
+lint:
 	go mod tidy
 	if [ -d vendor ]; then go mod vendor; fi
 	go fmt ./...
 	go vet ./...
 
-go-build:
+build:
 	bash swag.sh APP-swagger
 
-go-run:
+run:
 	bash swag.sh APP-swagger
 	./target/APP-swagger -swagger.title "APP Swagger"
 

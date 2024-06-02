@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"crypto/tls"
+	"encoding/base64"
 	"encoding/json"
 	"errors"
 	"flag"
@@ -20,6 +21,7 @@ import (
 	"swagger-go/docs"
 
 	"github.com/gin-gonic/gin"
+	"github.com/spf13/viper"
 	"github.com/swaggo/files"
 	"github.com/swaggo/gin-swagger"
 	"github.com/swaggo/swag"
@@ -49,11 +51,14 @@ type Server struct {
 
 func main() {
 	var (
-		server Server
+		config string
 		err    error
 		errch  chan error
 		quit   chan os.Signal
 		logger *slog.Logger
+		server Server
+
+		data SwaggerConfig
 	)
 
 	flag.BoolVar(&server.Release, "release", false, "run in release mode")
@@ -61,6 +66,7 @@ func main() {
 	flag.StringVar(&server.Path, "http.path", "", "http base path")
 	flag.StringVar(&server.TlsCert, "tls.cert", "", "http tls cert file")
 	flag.StringVar(&server.TlsKey, "tls.key", "", "http tls key file")
+	flag.StringVar(&config, "config", "", "yaml configuration file path")
 
 	flag.StringVar(
 		&docs.SwaggerInfo.Title, "swagger.title",
@@ -104,8 +110,29 @@ func main() {
 		}
 	}()
 
+	//
+	data = NewSwaggerConfig()
+	if config != "" {
+		vp := viper.New()
+		vp.SetConfigType("yaml")
+
+		vp.SetConfigName("")
+		vp.SetConfigFile(config)
+
+		if err = vp.ReadInConfig(); err != nil {
+			err = fmt.Errorf("ReadInConfig: %w", err)
+			return
+		}
+
+		// fmt.Printf("~~~ %s, %+v\n    %+v\n", config, vp, vp.Sub("accounts"))
+		if err = vp.Unmarshal(&data); err != nil {
+			err = fmt.Errorf("Viper.Unmarshal: %w", err)
+			return
+		}
+	}
+
 	// 1.
-	if err = server.Setup(); err != nil {
+	if err = server.Setup(data.Accounts); err != nil {
 		return
 	}
 
@@ -119,18 +146,16 @@ func main() {
 	})
 
 	// 2.2
-	startup_time := time.Now().Format(time.RFC3339)
 	go_version := runtime.Version()
 	meta := map[string]*string{
 		"build_time":      &build_time,
+		"build_host":      &build_host,
 		"go_version":      &go_version,
 		"git_repository":  &git_repository,
 		"git_branch":      &git_branch,
 		"git_commit_id":   &git_commit_id,
 		"git_commit_time": &git_commit_time,
 		"git_tree_state":  &git_tree_state,
-
-		"startup_time": &startup_time,
 	}
 
 	meta_bts, _ := json.Marshal(meta)
@@ -209,7 +234,7 @@ func main() {
 	}
 }
 
-func (self *Server) Setup() (err error) {
+func (self *Server) Setup(accounts []Account) (err error) {
 	var (
 		cert   tls.Certificate
 		router *gin.RouterGroup
@@ -243,6 +268,12 @@ func (self *Server) Setup() (err error) {
 		self.TLSConfig = &tls.Config{
 			Certificates: []tls.Certificate{cert},
 		}
+	}
+
+	if len(accounts) > 0 {
+		self.Engine.Use(BasicAuth(accounts, func(ctx *gin.Context, text string) {
+			ctx.String(http.StatusUnauthorized, text)
+		}))
 	}
 
 	return nil
@@ -282,6 +313,70 @@ func LoadSwagger(router *gin.RouterGroup, updates ...func(*swag.Spec)) {
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 }
 
+type Account struct {
+	Username string `mapstructure:"username"`
+	Password string `mapstructure:"password"`
+}
+
+type SwaggerConfig struct {
+	Accounts []Account `mapstructure:"accounts"`
+}
+
+func NewSwaggerConfig() SwaggerConfig {
+	return SwaggerConfig{Accounts: make([]Account, 0)}
+}
+
+// handle key: no_token, invalid_token, incorrect_token, User:XXXX
+func BasicAuth(accounts []Account, handle func(*gin.Context, string)) gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		var (
+			username string
+			password string
+			found    bool
+			bts      []byte
+			err      error
+		)
+
+		key := ctx.GetHeader("Authorization")
+
+		if !strings.HasPrefix(key, "Basic ") {
+			ctx.Header("Www-Authenticate", `Basic realm="login required"`)
+			handle(ctx, "no_token")
+			ctx.Abort()
+			return
+		}
+
+		if bts, err = base64.StdEncoding.DecodeString(key[6:]); err != nil {
+			handle(ctx, "invalid_token")
+			ctx.Abort()
+			return
+		}
+
+		if username, password, found = strings.Cut(string(bts), ":"); !found {
+			handle(ctx, "invalid_token")
+			ctx.Abort()
+			return
+		}
+
+		for i := range accounts {
+			if accounts[i].Username == username {
+				if accounts[i].Password == password {
+					// handle(ctx, fmt.Sprintf("User:%s", username))
+					ctx.Next()
+					return
+				} else {
+					handle(ctx, "incorrect_account")
+					ctx.Abort()
+					return
+				}
+			}
+		}
+
+		handle(ctx, "incorrect_account")
+		ctx.Abort()
+	}
+}
+
 /*
 
 // e01: Hello godoc
@@ -318,6 +413,7 @@ type Login struct {
 
 	// Option<map[string]any>: response data
 	Data map[string]any `json:"data,omitempty" swaggertype:"object,string" example:"ans:hello,value:42"`
+	XX string `swaggerignore:"true"`
 }
 
 */
