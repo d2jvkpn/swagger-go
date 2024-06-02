@@ -31,11 +31,11 @@ image-cn:
 #	@if [ ! -d "swagger" ]; then \
 #	    git clone git@github.com:d2jvkpn/swagger-go.git /tmp/swagger-go; \
 #	    rsync -arvP --exclude .git /tmp/swagger-go ./; \
-#	    mv swagger-go swagger; \
+#	    mv swagger-go swagger
 #	fi
-#	bash swagger/swag.sh APP-swagger
+#	bash swagger/swag.sh app-swagger
 
 #swag-run:
 #	bash swagger/swag.sh
-#	./swagger/target/APP-swagger
-#	# ./swagger/target/APP-swagger --config=configs/swagger.yaml
+#	./target/app-swagger
+#	# ./target/app-swagger -config=configs/swagger.yaml

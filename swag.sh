@@ -8,6 +8,7 @@ command -v swag || go install github.com/swaggo/swag/cmd/swag@latest
 name=${1:-swagger-go}
 
 # swag_dir=swagger-go/docs
+target_dir=${_wd}/target
 swag_dir=${_path}/docs
 echo "==> swag dir: $swag_dir"
 
@@ -35,7 +36,7 @@ unpushed=$(git diff origin/$git_branch..HEAD --name-status)
 [ ! -z "$uncommitted" ] && git_tree_state="uncommitted"
 
 
-mkdir -p target
+mkdir -p $target_dir
 
 GO_ldflags="-X main.build_time=$build_time \
   -X main.build_host=$build_host \
@@ -47,4 +48,4 @@ GO_ldflags="-X main.build_time=$build_time \
 
 set -x
 
-go build -ldflags="-w -s $GO_ldflags" -o target/$name main.go
+go build -ldflags="-w -s $GO_ldflags" -o $target_dir/$name main.go
