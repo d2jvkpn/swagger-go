@@ -110,33 +110,18 @@ func main() {
 		}
 	}()
 
-	//
+	// 1. config
 	data = NewSwaggerConfig()
-	if config != "" {
-		vp := viper.New()
-		vp.SetConfigType("yaml")
-
-		vp.SetConfigName("")
-		vp.SetConfigFile(config)
-
-		if err = vp.ReadInConfig(); err != nil {
-			err = fmt.Errorf("ReadInConfig: %w", err)
-			return
-		}
-
-		// fmt.Printf("~~~ %s, %+v\n    %+v\n", config, vp, vp.Sub("accounts"))
-		if err = vp.Unmarshal(&data); err != nil {
-			err = fmt.Errorf("Viper.Unmarshal: %w", err)
-			return
-		}
+	if err = SetAccounts(config, &data); err != nil {
+		return
 	}
 
-	// 1.
+	// 2. server
 	if err = server.Setup(data.Accounts); err != nil {
 		return
 	}
 
-	// 2.1
+	// 3
 	swagger_path := "/swagger"
 	if server.Path != "" {
 		swagger_path = "/" + server.Path + "/swagger"
@@ -166,7 +151,7 @@ func main() {
 		ctx.Writer.Write(meta_bts)
 	})
 
-	// 2.3
+	// 4
 	LoadSwagger(&server.Engine.RouterGroup)
 
 	// engine.Run(http_addr)
@@ -185,7 +170,7 @@ func main() {
 		logger.Error("service has been shut down", "error", e)
 	}()
 
-	// 3.
+	// 5.
 	errch = make(chan error, 1) // the cap of the channel should be equal to number of services
 	quit = make(chan os.Signal, 1)
 	signal.Notify(quit, os.Interrupt, syscall.SIGTERM) // syscall.SIGUSR2
@@ -232,6 +217,41 @@ func main() {
 		// errch <- fmt.Errorf("signal: %s", sig.String())
 		syncErrors(cap(errch))
 	}
+}
+
+func SetAccounts(config string, data *SwaggerConfig) (err error) {
+	if config == "" {
+		return nil
+	}
+
+	field := ""
+	if p1, p2, ok := strings.Cut(config, "::"); ok {
+		config, field = p1, p2
+	}
+
+	vp := viper.New()
+	vp.SetConfigType("yaml")
+
+	vp.SetConfigName("")
+	vp.SetConfigFile(config)
+
+	if err = vp.ReadInConfig(); err != nil {
+		return fmt.Errorf("ReadInConfig: %w", err)
+	}
+
+	if field != "" {
+		vp = vp.Sub(field)
+	}
+
+	// fmt.Printf("~~~ %s, %s, %+v\n", config, field, vp)
+	if err = vp.Unmarshal(&data); err != nil {
+		return fmt.Errorf("Viper.Unmarshal: %w", err)
+	}
+	if len(data.Accounts) == 0 {
+		return fmt.Errorf("no accounts in config")
+	}
+
+	return nil
 }
 
 func (self *Server) Setup(accounts []Account) (err error) {
