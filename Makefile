@@ -22,13 +22,13 @@ build:
 
 run:
 	bash swag.sh app-swagger
-	./target/APP-swagger -swagger.title="app swagger"
+	./target/app-swagger -swagger.title="app swagger"
 
 run-with-config:
 	bash swag.sh app-swagger
 	./target/app-swagger -swagger.title="app swagger" -config=configs/swagger.yaml
 
-image-cn:
+image-dev:
 	BUILD_Region=cn DOCKER_Tag=dev bash deployments/docker_build.sh main
 
 #swag-update:
