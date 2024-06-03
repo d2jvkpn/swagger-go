@@ -4,7 +4,7 @@ services:
   ${APP_Name}:
     image: ${IMAGE_Name}:${IMAGE_Tag}
     restart: always
-    container_name: ${APP_Name}_${APP_Tag}
+    container_name: ${APP_Name}
     user: "${USER_UID}:${USER_GID}"
     # networks: ["net"]
     network_mode: bridge
@@ -14,4 +14,4 @@ services:
     command: ["./target/main", "-release", "-http.addr=:${HTTP_Port}"]
 
 # networks:
-#   net: { name: "${APP_Name}_${APP_Tag}", driver: bridge, external: false }
+#   net: { name: "${APP_Name}", driver: bridge, external: false }

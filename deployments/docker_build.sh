@@ -11,6 +11,11 @@ app_name=$(yq .app_name project.yaml)
 app_version=$(yq .version project.yaml)
 image_name=$(yq .image_name project.yaml)
 
+if [[ "$app_name" == "null" || "$image_name" == "null" ]]; then
+    >&2 echo "neither app_name or image_name is unset in project.yaml"
+    exit 1
+fi
+
 tag=${git_branch}-$(yq .version project.yaml)
 tag=${DOCKER_Tag:-$tag}
 image=$image_name:$tag
