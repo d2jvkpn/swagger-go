@@ -154,23 +154,6 @@ func main() {
 	// 4
 	LoadSwagger(&server.Engine.RouterGroup)
 
-	// engine.Run(http_addr)
-	logger.Info("http server is up", "config", server)
-	go func() {
-		var e error
-
-		e = server.Serve()
-		// e != http.ErrServerClosed
-		if e != nil && !errors.Is(e, http.ErrServerClosed) {
-			errch <- e
-		} else {
-			errch <- nil
-		}
-
-		logger.Error("service has been shut down", "error", e)
-	}()
-
-	// 5.
 	errch = make(chan error, 1) // the cap of the channel should be equal to number of services
 	quit = make(chan os.Signal, 1)
 	signal.Notify(quit, os.Interrupt, syscall.SIGTERM) // syscall.SIGUSR2
@@ -186,6 +169,22 @@ func main() {
 	//		}
 	//	}()
 	//	<-ctx.Done()
+
+	// engine.Run(http_addr)
+	logger.Info("http server is up", "config", server)
+	go func() {
+		var e error
+
+		e = server.Serve()
+		// e != http.ErrServerClosed
+		if e != nil && !errors.Is(e, http.ErrServerClosed) {
+			errch <- e
+		} else {
+			errch <- nil
+		}
+
+		logger.Error("service has been shut down", "error", e)
+	}()
 
 	syncErrors := func(count int) {
 		logger.Warn("sync errors", "count", count)
@@ -224,7 +223,7 @@ func SetAccounts(config string, data *SwaggerConfig) (err error) {
 		return nil
 	}
 
-	field := ""
+	field := "swagger" // subfield of config
 	if p1, p2, ok := strings.Cut(config, "::"); ok {
 		config, field = p1, p2
 	}
@@ -239,12 +238,8 @@ func SetAccounts(config string, data *SwaggerConfig) (err error) {
 		return fmt.Errorf("ReadInConfig: %w", err)
 	}
 
-	if field != "" {
-		vp = vp.Sub(field)
-	}
-
 	// fmt.Printf("~~~ %s, %s, %+v\n", config, field, vp)
-	if err = vp.Unmarshal(&data); err != nil {
+	if err = vp.Sub(field).Unmarshal(data); err != nil {
 		return fmt.Errorf("Viper.Unmarshal: %w", err)
 	}
 	if len(data.Accounts) == 0 {
@@ -291,9 +286,7 @@ func (self *Server) Setup(accounts []Account) (err error) {
 	}
 
 	if len(accounts) > 0 {
-		self.Engine.Use(BasicAuth(accounts, func(ctx *gin.Context, text string) {
-			ctx.String(http.StatusUnauthorized, text)
-		}))
+		self.Engine.Use(BasicAuth(accounts))
 	}
 
 	return nil
@@ -347,7 +340,7 @@ func NewSwaggerConfig() SwaggerConfig {
 }
 
 // handle key: no_token, invalid_token, incorrect_token, User:XXXX
-func BasicAuth(accounts []Account, handle func(*gin.Context, string)) gin.HandlerFunc {
+func BasicAuth(accounts []Account) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		var (
 			username string
@@ -358,23 +351,24 @@ func BasicAuth(accounts []Account, handle func(*gin.Context, string)) gin.Handle
 		)
 
 		key := ctx.GetHeader("Authorization")
+		unauth := func(kind string) {
+			ctx.Header("Www-Authenticate", `Basic realm="login required"`)
+			ctx.JSON(http.StatusUnauthorized, gin.H{"code": "Unauthorized", "kind": kind})
+			ctx.Abort()
+		}
 
 		if !strings.HasPrefix(key, "Basic ") {
-			ctx.Header("Www-Authenticate", `Basic realm="login required"`)
-			handle(ctx, "no_token")
-			ctx.Abort()
+			unauth("no_token")
 			return
 		}
 
 		if bts, err = base64.StdEncoding.DecodeString(key[6:]); err != nil {
-			handle(ctx, "invalid_token")
-			ctx.Abort()
+			unauth("invalid_token")
 			return
 		}
 
 		if username, password, found = strings.Cut(string(bts), ":"); !found {
-			handle(ctx, "invalid_token")
-			ctx.Abort()
+			unauth("invalid_token")
 			return
 		}
 
@@ -385,15 +379,13 @@ func BasicAuth(accounts []Account, handle func(*gin.Context, string)) gin.Handle
 					ctx.Next()
 					return
 				} else {
-					handle(ctx, "incorrect_account")
-					ctx.Abort()
+					unauth("incorrect_account")
 					return
 				}
 			}
 		}
 
-		handle(ctx, "incorrect_account")
-		ctx.Abort()
+		unauth("incorrect_account")
 	}
 }
 

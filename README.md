@@ -17,13 +17,13 @@ swag-update:
 	@if [ ! -d "swagger-go" ]; then \
 	    git clone git@github.com:d2jvkpn/swagger-go.git /tmp/swagger-go; \
 	    rsync -arvP --exclude .git /tmp/swagger-go ./; \
-	    rm -rf /tmp/swagger-go; \
 	fi
-	bash swagger-go/swag.sh
+	bash swagger-go/swag.sh app-swagger
 
 swag-run:
-	bash swagger-go/swag.sh
-	./swagger-go/target/swagger-go
+	bash swagger-go/swag.sh app-swagger
+	./target/app-swagger -swagger.title "app swagger"
+#	# ./target/app-swagger -swagger.title "app swagger" -config=configs/swagger.yaml
 
 EOF
 

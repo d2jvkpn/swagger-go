@@ -18,11 +18,15 @@ lint:
 	go vet ./...
 
 build:
-	bash swag.sh APP-swagger
+	bash swag.sh app-swagger
 
 run:
-	bash swag.sh APP-swagger
-	./target/APP-swagger -swagger.title "APP Swagger"
+	bash swag.sh app-swagger
+	./target/APP-swagger -swagger.title="app swagger"
+
+run-with-config:
+	bash swag.sh app-swagger
+	./target/app-swagger -swagger.title="app swagger" -config=configs/swagger.yaml
 
 image-cn:
 	BUILD_Region=cn DOCKER_Tag=dev bash deployments/docker_build.sh main
@@ -36,5 +40,5 @@ image-cn:
 
 #swag-run:
 #	bash swagger-go/swag.sh app-swagger
-#	./target/app-swagger -swagger.title "app swagger"
-#	# ./target/app-swagger -swagger.title "app swagger" -config=configs/swagger.yaml
+#	./target/app-swagger -swagger.title="app swagger"
+#	# ./target/app-swagger -swagger.title="app swagger" -config=configs/swagger.yaml
