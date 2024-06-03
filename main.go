@@ -238,6 +238,10 @@ func SetAccounts(config string, data *SwaggerConfig) (err error) {
 		return fmt.Errorf("ReadInConfig: %w", err)
 	}
 
+	if vp.Sub(field) == nil {
+		return fmt.Errorf("no subfield %q in config", field)
+	}
+
 	// fmt.Printf("~~~ %s, %s, %+v\n", config, field, vp)
 	if err = vp.Sub(field).Unmarshal(data); err != nil {
 		return fmt.Errorf("Viper.Unmarshal: %w", err)
