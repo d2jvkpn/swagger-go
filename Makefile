@@ -35,6 +35,6 @@ image-cn:
 #	bash swagger-go/swag.sh app-swagger
 
 #swag-run:
-#	bash swagger-go/swag.sh
+#	bash swagger-go/swag.sh app-swagger
 #	./target/app-swagger -swagger.title "app swagger"
 #	# ./target/app-swagger -swagger.title "app swagger" -config=configs/swagger.yaml
