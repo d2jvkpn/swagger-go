@@ -12,7 +12,7 @@ services:
     environment: ["TZ=Asia/Shanghai"]
     # volumes:
     # ./configs:/app/configs:ro
-    command: ["./target/main", "-release", "-http.addr=:${HTTP_Port}"]
+    command: [./target/main, -release, -http.addr=:${HTTP_Port}]
 
 # networks:
 #   net: { name: "${APP_Name}", driver: bridge, external: false }

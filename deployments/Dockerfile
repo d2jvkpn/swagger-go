@@ -48,5 +48,5 @@ WORKDIR /app
 
 COPY --from=builder /app/target/main /app/target/main
 
-EXPOSE 3056
-CMD ["./target/main", "-release", "-http.addr=:3056"]
+EXPOSE 3065
+CMD [./target/main, -release, -http.addr=:3065]

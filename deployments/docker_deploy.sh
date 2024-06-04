@@ -7,8 +7,6 @@ export IMAGE_Name=$(yq .image_name project.yaml)
 export APP_Name=$(yq .app_name project.yaml)
 export USER_UID=$(id -u) USER_GID=$(id -g)
 
-container=${APP_Name}_${APP_Tag}
-
 envsubst < ${_path}/docker_deploy.yaml > docker-compose.yaml
 
 exit 0
