@@ -1,6 +1,6 @@
-app_name: swagger-go
-version: 0.1.2
-image_name: registry.cn-shanghai.aliyuncs.com/d2jvkpn/swagger-go
+app_name: app-swagger
+version: 0.1.0
+image_name: registry.cn-shanghai.aliyuncs.com/d2jvkpn/app-swagger
 repository: git@github.com:d2jvkpn/swagger-go.git
 
 # -config=configs/local.yaml
