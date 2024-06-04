@@ -5,8 +5,10 @@ _wd=$(pwd); _path=$(dirname $0 | xargs -i readlink -f {})
 ####
 command -v swag || go install github.com/swaggo/swag/cmd/swag@latest
 
-name=${1:-swagger-go}
-generate=${2:-true}
+app_name=${app_name:-""}
+[ -z "$app_name" ] && app_name=$(yq .app_name project.yaml)
+
+generate=${1:-true}
 
 # swag_dir=swagger-go/docs
 target_dir=${_wd}/target
@@ -20,7 +22,7 @@ if [[ "$generate" == "true" ]]; then
     swag fmt --dir $swag_dir --exclude ./vendor
 
     echo "<== swag done"
-done
+fi
 
 #### 2. go build
 cd ${_path}
@@ -53,4 +55,4 @@ GO_ldflags="-X main.build_time=$build_time \
 
 set -x
 
-go build -ldflags="-w -s $GO_ldflags" -o $target_dir/$name main.go
+go build -ldflags="-w -s $GO_ldflags" -o $target_dir/$app_name main.go

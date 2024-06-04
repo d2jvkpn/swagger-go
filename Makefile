@@ -18,14 +18,14 @@ lint:
 	go vet ./...
 
 build:
-	bash swag.sh app-swagger false
+	app_name=app-swagger bash swag.sh false
 
 run:
-	bash swag.sh app-swagger false
+	app_name=app-swagger bash swag.sh false
 	./target/app-swagger -swagger.title="app swagger"
 
 run-with-config:
-	bash swag.sh app-swagger
+	app_name=app-swagger bash swag.sh false
 	./target/app-swagger -swagger.title="app swagger" -config=configs/swagger.yaml
 
 image-dev:
@@ -36,9 +36,9 @@ image-dev:
 #	    git clone git@github.com:d2jvkpn/swagger-go.git /tmp/swagger-go; \
 #	    rsync -arvP --exclude .git /tmp/swagger-go ./; \
 #	fi
-#	bash swagger-go/swag.sh app-swagger
+#	app_name=app-swagger bash swagger-go/swag.sh true
 
 #swag-run:
-#	bash swagger-go/swag.sh app-swagger true
+#	app_name=app-swagger bash swagger-go/swag.sh true
 #	./target/app-swagger -swagger.title="app swagger"
 #	# ./target/app-swagger -swagger.title="app swagger" -config=configs/swagger.yaml
