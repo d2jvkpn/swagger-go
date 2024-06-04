@@ -49,4 +49,4 @@ WORKDIR /app
 COPY --from=builder /app/target/main /app/target/main
 
 EXPOSE 3065
-CMD [./target/main, -release, -http.addr=:3065]
+CMD [./target/main, -release, -config=configs/swagger.yaml, -http.addr=:3065]

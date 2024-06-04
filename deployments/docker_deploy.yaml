@@ -10,9 +10,10 @@ services:
     network_mode: bridge
     ports: ["127.0.0.1:${HTTP_Port}:${HTTP_Port}"]
     environment: ["TZ=Asia/Shanghai"]
-    # volumes:
-    # ./configs:/app/configs:ro
-    command: [./target/main, -release, -http.addr=:${HTTP_Port}]
+    working_dir: /app
+    volumes:
+    ./configs/swagger.yaml:/app/configs/swagger.yaml:ro
+    command: [./target/main, -release, -config=configs/swagger.yaml, -http.addr=:${HTTP_Port}]
 
 # networks:
 #   net: { name: "${APP_Name}", driver: bridge, external: false }
