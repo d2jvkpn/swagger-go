@@ -13,7 +13,7 @@ services:
     working_dir: /app
     volumes:
     - ./configs/swagger.yaml:/app/configs/swagger.yaml:ro
-    command: [./target/main, -release, -config=configs/swagger.yaml, -http.addr=:${HTTP_Port}]
+    command: [./target/main, -config=configs/swagger.yaml, -http.addr=:${HTTP_Port}]
 
 # networks:
 #   net: { name: "${APP_Name}", driver: bridge, external: false }
