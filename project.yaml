@@ -3,7 +3,7 @@ version: 0.1.2
 image_name: registry.cn-shanghai.aliyuncs.com/d2jvkpn/swagger-go
 repository: git@github.com:d2jvkpn/swagger-go.git
 
-# -config=configs/local.yaml::swagger
+# -config=configs/local.yaml
 swagger:
   title: "TODO"
   base_path: "TODO"
