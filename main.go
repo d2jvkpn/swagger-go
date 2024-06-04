@@ -331,7 +331,7 @@ func LoadSwagger(router *gin.RouterGroup, updates ...func(*swag.Spec)) {
 }
 
 type Account struct {
-	Username string `mapstructure:"username"`
+	Name     string `mapstructure:"name"`
 	Password string `mapstructure:"password"`
 }
 
@@ -347,7 +347,7 @@ func NewSwaggerConfig() SwaggerConfig {
 func BasicAuth(accounts []Account) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		var (
-			username string
+			name     string
 			password string
 			found    bool
 			bts      []byte
@@ -371,13 +371,13 @@ func BasicAuth(accounts []Account) gin.HandlerFunc {
 			return
 		}
 
-		if username, password, found = strings.Cut(string(bts), ":"); !found {
+		if name, password, found = strings.Cut(string(bts), ":"); !found {
 			unauth("invalid_token")
 			return
 		}
 
 		for i := range accounts {
-			if accounts[i].Username == username {
+			if accounts[i].Name == name {
 				if accounts[i].Password == password {
 					// handle(ctx, fmt.Sprintf("User:%s", username))
 					ctx.Next()

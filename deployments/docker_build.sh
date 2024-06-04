@@ -19,6 +19,7 @@ tag=${DOCKER_Tag:-$tag}
 image=$image_name:$tag
 # build_time=$(date +'%FT%T.%N%:z')
 build_time=$(date +'%FT%T%:z')
+build_host=$(hostname)
 
 # env variables
 GIT_Pull=$(printenv GIT_Pull || true)
@@ -67,7 +68,9 @@ done
 echo ">>> build image: $image..."
 
 GO_ldflags="-X main.build_time=$build_time \
+  -X main.build_host=$build_host \
   -X main.git_branch=$git_branch \
+  -X main.git_repository=$git_repository \
   -X main.git_commit_id=$git_commit_id \
   -X main.git_commit_time=$git_commit_time \
   -X main.git_tree_state=$git_tree_state \

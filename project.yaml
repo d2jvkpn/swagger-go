@@ -1,6 +1,7 @@
-app_name: app-swagger
+app_name: swagger-go
 version: 0.1.0
-image_name: registry.cn-shanghai.aliyuncs.com/d2jvkpn/app-swagger
+# image_name: registry.cn-shanghai.aliyuncs.com/d2jvkpn/swagger-go
+image_name: app-swagger
 repository: git@github.com:d2jvkpn/swagger-go.git
 
 # -config=configs/local.yaml
@@ -8,4 +9,4 @@ swagger:
   title: "TODO"
   base_path: "TODO"
   accounts:
-  - { username: hello, password: world }
+  - { name: hello, password: world }
