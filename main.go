@@ -62,7 +62,7 @@ func main() {
 	)
 
 	flag.BoolVar(&server.Release, "release", false, "run in release mode")
-	flag.StringVar(&server.Address, "http.addr", ":3056", "http listening address")
+	flag.StringVar(&server.Address, "http.addr", ":3066", "http listening address")
 	flag.StringVar(&server.Path, "http.path", "", "http base path")
 	flag.StringVar(&server.TlsCert, "tls.cert", "", "http tls cert file")
 	flag.StringVar(&server.TlsKey, "tls.key", "", "http tls key file")
