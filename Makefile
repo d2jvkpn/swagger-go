@@ -22,7 +22,7 @@ build:
 
 run:
 	app_name=app-swagger bash swag.sh false
-	./target/app-swagger -swagger.title="app swagger"
+	./target/app-swagger -swagger.title="app swagger" -http.addr=:3066
 
 run-with-config:
 	app_name=app-swagger bash swag.sh false
@@ -30,6 +30,9 @@ run-with-config:
 
 image-dev:
 	BUILD_Region=cn DOCKER_Push=false DOCKER_Tag=dev bash deployments/docker_build.sh dev
+
+deply-dev:
+	bash deployments/docker_deploy.sh dev 3067
 
 #swag-update:
 #	@if [ ! -d "swagger-go" ]; then \
@@ -41,4 +44,4 @@ image-dev:
 #swag-run:
 #	app_name=app-swagger bash swagger-go/swag.sh true
 #	./target/app-swagger -swagger.title="app swagger"
-#	# ./target/app-swagger -swagger.title="app swagger" -config=configs/swagger.yaml
+#	# ./target/app-swagger -swagger.title="app swagger" -config=configs/swagger.yaml -http.addr=:3066
