@@ -18,10 +18,10 @@ lint:
 	go vet ./...
 
 build:
-	bash swag.sh app-swagger
+	bash swag.sh app-swagger false
 
 run:
-	bash swag.sh app-swagger
+	bash swag.sh app-swagger false
 	./target/app-swagger -swagger.title="app swagger"
 
 run-with-config:
@@ -39,6 +39,6 @@ image-dev:
 #	bash swagger-go/swag.sh app-swagger
 
 #swag-run:
-#	bash swagger-go/swag.sh app-swagger
+#	bash swagger-go/swag.sh app-swagger true
 #	./target/app-swagger -swagger.title="app swagger"
 #	# ./target/app-swagger -swagger.title="app swagger" -config=configs/swagger.yaml

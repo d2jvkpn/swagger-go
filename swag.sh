@@ -6,18 +6,23 @@ _wd=$(pwd); _path=$(dirname $0 | xargs -i readlink -f {})
 command -v swag || go install github.com/swaggo/swag/cmd/swag@latest
 
 name=${1:-swagger-go}
+generate=${2:-true}
 
 # swag_dir=swagger-go/docs
 target_dir=${_wd}/target
 swag_dir=${_path}/docs
-echo "==> swag dir: $swag_dir"
 
-swag init --output $swag_dir
-swag fmt --dir $swag_dir --exclude ./vendor
+### 1. swagger generate
+if [[ "$generate" == "true" ]]; then
+    echo "==> swag dir: $swag_dir"
 
-echo "<== swag done"
+    swag init --output $swag_dir
+    swag fmt --dir $swag_dir --exclude ./vendor
 
-####
+    echo "<== swag done"
+done
+
+#### 2. go build
 cd ${_path}
 
 # build_time=$(date +'%FT%T.%N%:z')
