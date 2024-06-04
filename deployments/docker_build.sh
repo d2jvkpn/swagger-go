@@ -67,14 +67,16 @@ done
 
 echo ">>> build image: $image..."
 
-GO_ldflags="-X main.build_time=$build_time \
+GO_ldflags="\
+  -X main.build_time=$build_time \
   -X main.build_host=$build_host \
   -X main.git_branch=$git_branch \
-  -X main.git_repository=$git_repository \
   -X main.git_commit_id=$git_commit_id \
   -X main.git_commit_time=$git_commit_time \
-  -X main.git_tree_state=$git_tree_state \
-  -X main.image=$image"
+  -X main.git_tree_state=$git_tree_state"
+
+#  -X main.git_repository=$git_repository
+#  -X main.image=$image
 
 docker build --no-cache --file ${_path}/Dockerfile \
   --build-arg=BUILD_Region="$BUILD_Region" \
