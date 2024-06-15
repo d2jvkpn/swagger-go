@@ -13,15 +13,16 @@
 
 cat >> Makefile <<'EOF'
 
-swag-update:
+update-swag:
 	@if [ ! -d "swagger-go" ]; then \
 	    git clone git@github.com:d2jvkpn/swagger-go.git /tmp/swagger-go; \
-	    rsync -arvP --exclude .git /tmp/swagger-go ./; \
+	    mkdir -p bin; \
+	    rsync -arvP --exclude .git /tmp/swagger-go ./bin/; \
 	fi
-	bash swagger-go/swag.sh app-swagger
+	bash bin/swagger-go/swag.sh app-swagger
 
-swag-run:
-	bash swagger-go/swag.sh app-swagger
+run-swag:
+	bash bin/swagger-go/swag.sh app-swagger
 	./target/app-swagger -swagger.title "app swagger"
 #	# ./target/app-swagger -swagger.title "app swagger" -config=configs/swagger.yaml
 

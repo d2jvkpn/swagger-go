@@ -34,7 +34,7 @@ image-dev:
 deply-dev:
 	bash deployments/docker_deploy.sh dev 3067
 
-#swag-update:
+#update-swag:
 #	@if [ ! -d "bin/swagger-go" ]; then \
 #	    git clone git@github.com:d2jvkpn/swagger-go.git /tmp/swagger-go; \
 #	    mkdir -p bin; \
@@ -42,7 +42,7 @@ deply-dev:
 #	fi
 #	app_name=app-swagger bash bin/swagger-go/swag.sh true
 
-#swag-run:
+#run-swag:
 #	app_name=app-swagger bash bin/swagger-go/swag.sh true
 #	./target/app-swagger -swagger.title="app swagger"
 #	# ./target/app-swagger -swagger.title="app swagger" -config=configs/swagger.yaml -http.addr=:3066
