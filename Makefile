@@ -34,7 +34,7 @@ image-dev:
 deply-dev:
 	bash deployments/docker_deploy.sh dev 3067
 
-#update-swag:
+#build-swag:
 #	@if [ ! -d "bin/swagger-go" ]; then \
 #	    git clone git@github.com:d2jvkpn/swagger-go.git /tmp/swagger-go; \
 #	    mkdir -p bin; \

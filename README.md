@@ -13,7 +13,7 @@
 
 cat >> Makefile <<'EOF'
 
-update-swag:
+build-swag:
 	@if [ ! -d "swagger-go" ]; then \
 	    git clone git@github.com:d2jvkpn/swagger-go.git /tmp/swagger-go; \
 	    mkdir -p bin; \
