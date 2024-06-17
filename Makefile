@@ -29,9 +29,10 @@ run-with-config:
 	./target/app-swagger -swagger.title="app swagger" -config=configs/swagger.yaml
 
 image-dev:
-	BUILD_Region=cn DOCKER_Push=false DOCKER_Tag=dev bash deployments/docker_build.sh dev
+	BUILD_Region=cn DOCKER_Push=false DOCKER_Tag=dev \
+	  bash deployments/docker_build.sh dev
 
-deply-dev:
+deploy-dev:
 	bash deployments/docker_deploy.sh dev 3067
 
 #build-swag:
