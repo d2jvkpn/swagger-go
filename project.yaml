@@ -9,4 +9,4 @@ swagger:
   title: "TODO"
   base_path: "TODO"
   accounts:
-  - { name: hello, password: world }
+  - { name: "accounts", password: "password" }
