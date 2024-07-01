@@ -18,14 +18,14 @@ lint:
 	go vet ./...
 
 build:
-	app_name=app-swagger bash swag.sh false
+	app_name=app-swagger bash swag.sh false > /dev/null
 
 run:
-	app_name=app-swagger bash swag.sh false
+	app_name=app-swagger bash swag.sh false > /dev/null
 	./target/app-swagger -swagger.title="app swagger" -http.addr=:3066
 
 run-with-config:
-	app_name=app-swagger bash swag.sh false
+	app_name=app-swagger bash swag.sh false > /dev/null
 	./target/app-swagger -swagger.title="app swagger" -config=configs/swagger.yaml
 
 image-dev:
