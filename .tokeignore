@@ -1,0 +1,4 @@
+vendor/
+*.pb.go
+
+swagger-go/
