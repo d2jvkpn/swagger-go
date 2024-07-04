@@ -17,15 +17,17 @@ lint:
 	go fmt ./...
 	go vet ./...
 
+	app_name=app-swagger bash swag.sh false > /dev/null
+
 build:
 	app_name=app-swagger bash swag.sh false > /dev/null
 
 run:
-	app_name=app-swagger bash swag.sh false > /dev/null
+	app_name=app-swagger bash swag.sh true > /dev/null
 	./target/app-swagger -swagger.title="app swagger" -http.addr=:3066
 
 run-with-config:
-	app_name=app-swagger bash swag.sh false > /dev/null
+	app_name=app-swagger bash swag.sh true > /dev/null
 	./target/app-swagger -swagger.title="app swagger" -config=configs/swagger.yaml
 
 image-dev:
@@ -41,7 +43,7 @@ deploy-dev:
 #	    mkdir -p bin; \
 #	    rsync -arvP --exclude .git /tmp/swagger-go ./bin/; \
 #	fi
-#	app_name=app-swagger bash bin/swagger-go/swag.sh true
+#	app_name=app-swagger bash bin/swagger-go/swag.sh false
 
 #run-swag:
 #	app_name=app-swagger bash bin/swagger-go/swag.sh true

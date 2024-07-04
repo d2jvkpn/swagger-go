@@ -8,23 +8,25 @@ command -v swag || go install github.com/swaggo/swag/cmd/swag@latest
 app_name=${app_name:-""}
 [ -z "$app_name" ] && app_name=$(yq .app_name project.yaml)
 
-generate=${1:-true}
+build=${1:-true}
 
 # swag_dir=swagger-go/docs
 target_dir=${_wd}/target
 swag_dir=${_path}/docs
 
 ### 1. swagger generate
-if [[ "$generate" == "true" ]]; then
-    echo "==> swag dir: $swag_dir"
+echo "==> swag dir: $swag_dir"
 
-    swag init --output $swag_dir
-    swag fmt --dir $swag_dir --exclude ./vendor
+swag init --output $swag_dir
+swag fmt --dir $swag_dir --exclude ./vendor
 
-    echo "<== swag done"
-fi
+echo "<== swag done"
 
 #### 2. go build
+if [[ "$build" != "true" ]]; then
+    exit 0
+fi
+
 cd ${_path}
 
 # build_time=$(date +'%FT%T.%N%:z')

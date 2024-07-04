@@ -19,10 +19,10 @@ build-swag:
 	    mkdir -p bin; \
 	    rsync -arvP --exclude .git /tmp/swagger-go ./bin/; \
 	fi
-	bash bin/swagger-go/swag.sh app-swagger
+	app_name=app-swagger bash bin/swagger-go/swag.sh false
 
 run-swag:
-	bash bin/swagger-go/swag.sh app-swagger
+	app_name=app-swagger bash bin/swagger-go/swag.sh app-swagger true
 	./target/app-swagger -swagger.title "app swagger"
 #	# ./target/app-swagger -swagger.title "app swagger" -config=configs/swagger.yaml
 
