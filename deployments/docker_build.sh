@@ -56,6 +56,8 @@ unpushed=$(git diff origin/$git_branch..HEAD --name-status)
 ####
 echo "==> docker build $image"
 
+mkdir cache
+
 [[ "$DOCKER_Pull" != "false" ]] && \
 for base in $(awk '/^FROM/{print $2}' ${_path}/Dockerfile); do
     echo ">>> pull $base"

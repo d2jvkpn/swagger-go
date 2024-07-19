@@ -21,6 +21,9 @@ WORKDIR /app
 ADD ./main.go ./go.mod ./go.sum  ./
 COPY ./docs ./docs
 
+COPY ./cache ./cache
+RUN if [ -d ./cache/vendor ]; then echo "==> found vendor"; mv ./cache/vendor vendor; fi
+
 # in alpine, date doesn't parse %:z
 RUN mkdir -p target && \
   go build -o target/main -ldflags="-w -s ${GO_ldflags}" main.go
