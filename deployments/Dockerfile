@@ -21,8 +21,11 @@ WORKDIR /app
 ADD ./main.go ./go.mod ./go.sum  ./
 COPY ./docs ./docs
 
-COPY ./cache ./cache
-RUN if [ -d ./cache/vendor ]; then echo "==> found vendor"; mv ./cache/vendor vendor; fi
+COPY ./cache.local ./cache.local
+RUN if [ -d cache.local/vendor ]; then \
+    echo "==> Found cache.local/vendor"; \
+    mv cache.local/vendor vendor; \
+  fi
 
 # in alpine, date doesn't parse %:z
 RUN mkdir -p target && \

@@ -32,3 +32,4 @@ configs/
 data/
 logs/
 site/
+*.local
