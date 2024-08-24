@@ -8,7 +8,7 @@ _wd=$(pwd); _path=$(dirname $0 | xargs -i readlink -f {})
 git_branch=$1
 
 app_name=$(yq .app_name project.yaml)
-app_version=$(yq .version project.yaml)
+app_version=$(yq .app_version project.yaml)
 image_name=$(yq .image_name project.yaml)
 
 [[ "${app_name}${app_version}${image_name}" == *"null"* ]] &&
@@ -56,7 +56,7 @@ unpushed=$(git diff origin/$git_branch..HEAD --name-status)
 ####
 echo "==> docker build $image"
 
-mkdir cache
+mkdir cache.local
 
 [[ "$DOCKER_Pull" != "false" ]] && \
 for base in $(awk '/^FROM/{print $2}' ${_path}/Dockerfile); do
