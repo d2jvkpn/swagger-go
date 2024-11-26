@@ -32,10 +32,10 @@ run-with-config:
 
 image-dev:
 	BUILD_Region=cn DOCKER_Push=false DOCKER_Tag=dev \
-	  bash deployments/docker_build.sh dev
+	  bash deployments/build.sh dev
 
 deploy-dev:
-	bash deployments/docker_deploy.sh dev 3067
+	bash deployments/compose.sh dev 3067
 
 #build-swag:
 #	@if [ ! -d "bin/swagger-go" ]; then \

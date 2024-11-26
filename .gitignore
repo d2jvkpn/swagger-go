@@ -26,6 +26,9 @@ go.work
 .env
 .postgres
 docker-compose.yaml
+docker-compose.yml
+compose.yaml
+compose.yml
 
 target/
 configs/

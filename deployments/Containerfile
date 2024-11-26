@@ -16,7 +16,7 @@ RUN if [ "$BUILD_Region" = "cn" ]; then \
 
 RUN apk --no-cache update && apk --no-cache upgrade
 
-WORKDIR /app
+WORKDIR /apps
 
 ADD ./main.go ./go.mod ./go.sum  ./
 COPY ./docs ./docs
@@ -49,10 +49,10 @@ RUN apk --no-cache update && \
   apk --no-cache add tzdata
   # curl
 
-RUN mkdir -p /app/target
-WORKDIR /app
+RUN mkdir -p /apps/target
+WORKDIR /apps
 
-COPY --from=builder /app/target/main /app/target/main
+COPY --from=builder /apps/target/main /apps/starget/main
 
 EXPOSE 3065
 CMD [./target/main, -release, -config=configs/swagger.yaml, -http.addr=:3065]
